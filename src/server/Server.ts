@@ -54,7 +54,7 @@ const Server = async (rootPath: string) => {
     const server = http
         .createServer((rq, rs) => handleRq({ rq, rs, rootPath, api }))
         .listen(HTTP_PORT, "0.0.0.0", () => {
-            console.log("listening kunkka-torrent requests on http://localhost:" + HTTP_PORT);
+            console.log("listening kunkka-torrent requests on http://localhost:" + HTTP_PORT + ' ' + process.env.WEBSITE_SITE_NAME);
         });
     socketIo.listen(server);
 };

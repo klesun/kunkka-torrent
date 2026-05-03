@@ -4,6 +4,7 @@ import * as Papa from 'papaparse';
 import {InfohashDbRow, NoFilesInfoSource} from "../src/server/typing/InfohashDbRow";
 import DbPool from "../src/server/utils/DbPool";
 import * as SqlUtil from 'klesun-node-tools/src/Utils/SqlUtil.js';
+import {IS_AZURE_ENV} from "../src/server/Constants.ts";
 
 /** @see https://stackoverflow.com/a/39460727/2750743 */
 function base64ToHex(str: string) {
@@ -52,32 +53,34 @@ const addFromCsv = async (csvPath: string, source: NoFilesInfoSource) => {
     });
 };
 
+const dbFilesDir = IS_AZURE_ENV ? '/mnt/kunkka-db-files' : __dirname + '/../node_modules/piratebay-db-dump';
+
 const main = async () => {
     const tpbCsvPaths = [
-        __dirname + '/../node_modules/piratebay-db-dump/piratebay_db_dump_2004_03_25T22_03_00_to_2015_10_27T04_10_22.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/piratebay_db_dump_2015_10_27T04_10_50_to_2019_09_14T22_09_31.csv'
+        dbFilesDir + '/piratebay_db_dump_2004_03_25T22_03_00_to_2015_10_27T04_10_22.csv',
+        dbFilesDir + '/piratebay_db_dump_2015_10_27T04_10_50_to_2019_09_14T22_09_31.csv'
     ];
     const rutrackerCsvPaths = [
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_2.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_8.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_9.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_10.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_11.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_18.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_19.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_20.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_22.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_23.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_24.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_25.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_26.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_28.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_29.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_31.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_33.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_34.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_35.csv',
-        __dirname + '/../node_modules/piratebay-db-dump/rutracker_2020_09_27/category_37.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_2.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_8.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_9.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_10.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_11.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_18.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_19.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_20.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_22.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_23.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_24.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_25.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_26.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_28.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_29.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_31.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_33.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_34.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_35.csv',
+        dbFilesDir + '/rutracker_2020_09_27/category_37.csv',
     ];
     const csvPaths = [
         // ...tpbCsvPaths.map(csvPath => ({csvPath, source: 'tpb_dump_2019' as const})),

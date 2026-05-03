@@ -5,6 +5,7 @@ import type { HandleHttpParams } from "../HandleHttpRequest";
 import { InternalServerError } from "@curveball/http-errors";
 import Infohashes from "../repositories/Infohashes";
 import type { InfohashDbRow } from "../typing/InfohashDbRow";
+import {IS_AZURE_ENV} from "../Constants.ts";
 
 const fs = fsSync.promises;
 const Xml = require("klesun-node-tools/src/Utils/Xml.js");
@@ -23,8 +24,11 @@ type TorrentsCsvRecordFull = TorrentsCsvRecord & {
     infohash: string,
 };
 
+const dbFilesDir = IS_AZURE_ENV ? '/mnt/kunkka-db-files' : __dirname + '/../../../node_modules/torrents-csv-data';
+
 // I have 28 GiB of RAM, so I don't mind keeping whole CSV here... for now at least
-const torrentsCsvPath = __dirname + "/../../../node_modules/torrents-csv-data/torrents.csv";
+// Upd. 2026: I mind, Azure RAM don't grow on trees T_T
+const torrentsCsvPath = dbFilesDir + "/torrents.csv";
 const whenInfoHashToRecord = fs.readFile(torrentsCsvPath, "utf-8").then(csvText => {
     const parsed = Papaparse.parse(csvText.trim(), { delimiter: ";" });
     const rows = <string[][]>parsed.data;

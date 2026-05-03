@@ -1,4 +1,6 @@
 /.idea
+/.claude
+/app.zip
 /node_modules
 /kunkka_hos
 .DS_Store

@@ -29,6 +29,8 @@ if %ERRORLEVEL% neq 0 (
 
 echo Published. Waiting 60 seconds to make warmup request after changes come into effect...
 
+call rm app.zip
+
 call npm ci
 
 ping 127.0.0.1 -n 45 > nul

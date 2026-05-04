@@ -2,7 +2,7 @@
 import * as Papaparse from "papaparse";
 import * as fsSync from "fs";
 import type { HandleHttpParams } from "../HandleHttpRequest";
-import { InternalServerError } from "@curveball/http-errors";
+import {InternalServerError, ServiceUnavailable} from "@curveball/http-errors";
 import Infohashes from "../repositories/Infohashes";
 import type { InfohashDbRow } from "../typing/InfohashDbRow";
 import {IS_AZURE_ENV} from "../Constants.ts";
@@ -102,7 +102,15 @@ function normalizeLocalDbRecord(localDbRecord: InfohashDbRow): NormalizedRecord 
 
 const ServeInfoPage = async (params: HandleHttpParams, infoHash: string) => {
     const whenCsvRecord = getInfohashRecord(infoHash);
-    const whenLocalDbRecord = Infohashes().selectOne(infoHash);
+    const whenLocalDbRecord = Infohashes().selectOne(infoHash)
+        .catch((error: null | undefined | { code?: 'SQLITE_CANTOPEN' | unknown }) => {
+            if (error?.code === 'SQLITE_CANTOPEN') {
+                console.warn('Local Infohashes DB file is missing on the server');
+                return undefined;
+            } else {
+                throw error;
+            }
+        });
     const csvRecord = await whenCsvRecord;
     const localDbRecord = await whenLocalDbRecord;
 

@@ -2,6 +2,7 @@ FROM kunkkatorrents.azurecr.io/kunkka-torrent-base:latest
 
 COPY assets assets
 COPY scripts scripts
+RUN chmod +x scripts/*.sh
 COPY src src
 COPY styles styles
 COPY views views

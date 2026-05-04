@@ -1,4 +1,4 @@
-import ApiUntyped from "../src/client/ApiUntyped.js";
+import ApiUntyped, {HttpStatusError} from "../src/client/ApiUntyped.js";
 import { loadModule } from "https://klesun.github.io/ts-browser/src/ts-browser.js";
 
 const api = ApiUntyped();
@@ -23,6 +23,14 @@ const main = async () => {
     });
     const whenLocalResults = api.findTorrentsInLocalDb({
         userInput: searchParams.get('pattern'),
+    }).catch(error => {
+        if (error instanceof HttpStatusError &&
+            error.response.status === 503 // db file not supplied on this environment
+        ) {
+            return [];
+        } else {
+            throw error;
+        }
     });
 
     // language=file-reference

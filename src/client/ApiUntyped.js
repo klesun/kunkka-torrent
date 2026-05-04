@@ -7,6 +7,13 @@
 export const BACKEND_BASE_URL = "";
 // export const BACKEND_BASE_URL = "https://torrent.klesun.net";
 
+export class HttpStatusError extends Error {
+    constructor(response) {
+        super('Unsuccessful response status: ' + response.status + ' ' + response.statusText);
+        this.response = response;
+    }
+}
+
 /**
  * @template {JsonValue<undefined>} T
  * @param {Response} rs
@@ -14,7 +21,7 @@ export const BACKEND_BASE_URL = "";
  */
 export const parseResponse = async function(rs) {
     if (rs.status !== 200) {
-        throw new Error(rs.statusText);
+        throw new HttpStatusError(rs);
     } else {
         /** @type {T} */
         const data = await rs.json();

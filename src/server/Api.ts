@@ -13,7 +13,7 @@ const util = require("util");
 const execFile = util.promisify(require("child_process").execFile);
 import * as fs from "fs";
 import * as parseTorrent from "parse-torrent";
-import { BadGateway, BadRequest, NotFound, NotImplemented, TooEarly } from "@curveball/http-errors";
+import {BadGateway, BadRequest, NotFound, NotImplemented, ServiceUnavailable, TooEarly} from "@curveball/http-errors";
 import TorrentNamesFts from "./repositories/TorrentNamesFts";
 import { trackerRecords } from "./actions/ScrapeTrackersSeedInfo";
 import Infohashes from "./repositories/Infohashes";
@@ -275,7 +275,7 @@ const Api = () => {
         try {
             result = await execFile(scriptPath, args);
         } catch (exc) {
-            const msg = (exc && typeof exc === "object" && ("stderr" in exc) && exc.stderr ? "STDERR: " + String(exc.stderr) + "\n" : "") +
+            const msg = (exc && typeof exc === "object" && ("stderr" in exc) && exc.stderr ? "STDERR: " + String(exc.stderr) + "\n" : String(exc) + "\n") +
                 "Python script failed to retrieve torrent";
             if (msg.includes("UNSUPPORTED_TRACKER")) {
                 return await tryInterpretAsMagnet(fileUrl);
@@ -317,7 +317,14 @@ const Api = () => {
 
     const findTorrentsInLocalDb = async (req: http.IncomingMessage) => {
         const { userInput } = <Record<string, string>>url.parse(<string>req.url, true).query;
-        const ftsRows = await torrentNamesFts.select(userInput);
+        const ftsRows = await torrentNamesFts.select(userInput)
+            .catch((error: null | undefined | { code?: 'SQLITE_CANTOPEN' | unknown }) => {
+                if (error?.code === 'SQLITE_CANTOPEN') {
+                    throw new ServiceUnavailable('Local Infohashes DB file is missing on the server');
+                } else {
+                    throw error;
+                }
+            });
         return infohashes.selectIn(ftsRows.map(r => r.infohash));
     };
 

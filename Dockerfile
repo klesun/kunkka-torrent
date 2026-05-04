@@ -1,5 +1,7 @@
 FROM node:20
 
+RUN apt-get update && apt-get install -y qbittorrent-nox && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -12,4 +14,9 @@ COPY styles styles
 COPY views views
 COPY favicon.ico index.html server.ts tsconfig.json ./
 
-CMD ["npm", "start"]
+RUN mkdir -p /root/.config/qBittorrent
+COPY docker/qbittorrent.conf /root/.config/qBittorrent/qBittorrent.conf
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]

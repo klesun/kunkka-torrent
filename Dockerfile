@@ -1,6 +1,13 @@
-FROM node:20
+FROM node:20-slim
 
-RUN apt-get update && apt-get install -y qbittorrent-nox curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y qbittorrent-nox curl openssh-server python3 && rm -rf /var/lib/apt/lists/*
+
+# Azure App Service SSH support (port 2222, password "Docker!")
+COPY docker/sshd_config /etc/ssh/sshd_config
+RUN mkdir -p /run/sshd /root/.ssh && \
+    echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK4RV9VJCeAKno6X9MYLp8U+boQLsLND5oynfOAJbOpo claude-debug" > /root/.ssh/authorized_keys && \
+    chmod 700 /root/.ssh && chmod 600 /root/.ssh/authorized_keys
+EXPOSE 2222
 
 # Install Jackett
 RUN curl -sL "https://github.com/Jackett/Jackett/releases/latest/download/Jackett.Binaries.LinuxAMDx64.tar.gz" | tar -xz -C /opt

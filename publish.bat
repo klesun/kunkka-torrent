@@ -1,43 +1,28 @@
-# MUST RUN ONLY FROM cmd.exe or PowerShell! DO NOT RUN FROM GIT BASH, IT WILL CORRUPT THE .zip FILE
-
 @echo on
 
-call npm ci
+set ACR_NAME=kunkkatorrents
+set APP_NAME=kunkka-torrent
+set RESOURCE_GROUP=DefaultResourceGroup-NEU
+set SUBSCRIPTION=3a50dbec-b5b4-4041-b97d-a3125ef48c42
 
+rem Build image in Azure cloud (no local Docker needed)
+call az acr build --registry %ACR_NAME% --image %APP_NAME%:latest . --subscription %SUBSCRIPTION%
 if %ERRORLEVEL% neq 0 (
-    echo Failed to restore server node_modules from lock file
+    echo ACR build failed
     exit /b %ERRORLEVEL%
 )
 
-
-echo "Removing dev dependencies"
-call npm prune --omit=dev --omit=optional --omit=peer
-
-echo "Done removing dev dependencies"
-
-echo "Zipping the application for publish"
-call Tar -a -cf app.zip assets scripts src styles views favicon.ico index.html package.json package-lock.json server.ts tsconfig.json
+rem Restart app so it pulls the new image
+call az webapp restart --name %APP_NAME% --resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
 if %ERRORLEVEL% neq 0 (
-    echo Zip file generation failed
-    exit /b %ERRORLEVEL%
-)
-call az webapp deployment source config-zip --src ./app.zip -n kunkka-torrent -g DefaultResourceGroup-NEU --subscription 3a50dbec-b5b4-4041-b97d-a3125ef48c42
-if %ERRORLEVEL% neq 0 (
-    echo Azure CLI deployment call failed
+    echo App restart failed
     exit /b %ERRORLEVEL%
 )
 
-echo Published. Waiting 60 seconds to make warmup request after changes come into effect...
-
-call rm app.zip
-
-call npm ci
-
-ping 127.0.0.1 -n 45 > nul
-echo Making a ping warmup call...
+echo Published. Waiting 60 seconds for warmup...
+ping 127.0.0.1 -n 61 > nul
+echo Making warmup call...
 echo %time%
 call curl https://kunkka-torrent.azurewebsites.net/
 echo.
 echo %time%
-
-call del app.zip

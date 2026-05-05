@@ -21,6 +21,9 @@ COPY docker/qbittorrent.conf /root/.config/qBittorrent/qBittorrent.conf
 RUN mkdir -p /root/.config/Jackett
 COPY docker/jackett-serverconfig.json /root/.config/Jackett/ServerConfig.json
 
+COPY docker/enable-indexers.sh /tmp/enable-indexers.sh
+RUN chmod +x /tmp/enable-indexers.sh && /tmp/enable-indexers.sh && rm /tmp/enable-indexers.sh
+
 RUN mkdir -p /root/.local/share/data/qBittorrent/nova3/engines
 RUN curl -sL "https://raw.githubusercontent.com/qbittorrent/search-plugins/master/nova3/engines/jackett.py" \
     -o /root/.local/share/data/qBittorrent/nova3/engines/jackett.py

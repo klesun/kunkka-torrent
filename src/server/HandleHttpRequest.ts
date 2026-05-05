@@ -1,5 +1,5 @@
 import * as url from "url";
-import * as pump from "pump";
+import pump from "pump";
 import * as fsSync from "fs";
 import type * as http from "http";
 import type { IApi } from "./Api.ts";
@@ -163,7 +163,9 @@ const serveTorrentStream = async (params: HandleHttpParams) => {
             return rs.end();
         }
         const stream = file.createReadStream()
-            .on("open", () => stream.pipe(rs))
+            .on("open", () => {
+                stream.pipe(rs);
+            })
             .on("error", (err: Error) => {
                 console.error("Error while reading torrent stream", err);
                 rs.end(err + "");

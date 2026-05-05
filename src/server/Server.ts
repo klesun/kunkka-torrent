@@ -22,7 +22,9 @@ const handleRq = (params: HandleHttpParams) => {
         params.rs.end(JSON.stringify({ error: exc + "", stack: exc.stack }));
         const msg = "kunkka-torrent HTTP request " + params.rq.url + " " + " failed";
         if (!exc.isOk) {
-            console.error(msg, exc);
+            console.error(msg);
+            console.error(exc);
+            console.error(exc.stack);
         }
     });
 };

@@ -48,6 +48,51 @@ export const trackerRecords: TrackerRecord[] = [
 
     // timeouts often
     //{url: 'udp://tracker0.ufibox.com:6969/announce', maxHashesPerRequest: 75},
+
+    // added from ngosang/trackerslist trackers_best.txt
+    { url: "udp://open.tracker.cl:1337/announce", maxHashesPerRequest: 75 }, // Chilean open tracker, long-running
+    { url: "udp://open.demonii.com:1337/announce", maxHashesPerRequest: 75 }, // one of the oldest high-traffic trackers
+    { url: "udp://tracker.openbittorrent.com:80/announce", maxHashesPerRequest: 75 }, // OpenBittorrent project, one of the largest public trackers
+    { url: "udp://tracker.openbittorrent.com:6969/announce", maxHashesPerRequest: 75 }, // same, alternate port
+    { url: "udp://tracker.dler.org:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.altrosky.cc:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.bitsearch.to:1337/announce", maxHashesPerRequest: 75 }, // run by bitsearch.to search engine
+    { url: "udp://tracker.qu.ax:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.theoks.net:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.gmi.gd:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.fnix.net:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker-udp.gbitt.info:80/announce", maxHashesPerRequest: 75 }, // gbitt.info UDP endpoint
+    { url: "udp://vito-tracker.space:6969/announce", maxHashesPerRequest: 75 }, // vito-tracker (same tracker on two domains)
+    { url: "udp://vito-tracker.duckdns.org:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.004430.xyz:1337/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tr4ck3r.duckdns.org:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://ipv4announce.sktorrent.eu:6969/announce", maxHashesPerRequest: 75 }, // European tracker
+    { url: "udp://torrents.tmtime.dev:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://martin-gebhardt.eu:25/announce", maxHashesPerRequest: 75 }, // personally hosted, unusually on port 25
+    { url: "udp://udp.tracker.projectk.org:23333/announce", maxHashesPerRequest: 75 },
+
+    { url: "udp://tracker.plx.im:6969/announce", maxHashesPerRequest: 50 },
+    { url: "udp://utracker.ghostchu-services.top:6969/announce", maxHashesPerRequest: 50 }, // GhostChu services
+    { url: "udp://tracker.t-1.org:6969/announce", maxHashesPerRequest: 50 },
+    { url: "udp://ipv4.tracker.harry.lu:80/announce", maxHashesPerRequest: 50 }, // IPv4-only
+    { url: "udp://bt1.archive.org:6969/announce", maxHashesPerRequest: 50 }, // Internet Archive tracker
+    { url: "udp://bt2.archive.org:6969/announce", maxHashesPerRequest: 50 }, // Internet Archive tracker (secondary)
+    { url: "http://tracker.gbitt0.info:80/announce", maxHashesPerRequest: 50 },
+    { url: "http://tracker.dler.org:6969/announce", maxHashesPerRequest: 50 },
+    { url: "http://tracker.qu.ax:6969/announce", maxHashesPerRequest: 50 },
+    { url: "http://tracker.opentrackr.org:1337/announce", maxHashesPerRequest: 50 }, // HTTP endpoint of the top tracker
+    { url: "https://tracker.gbitt0.info:443/announce", maxHashesPerRequest: 50 },
+    { url: "https://tracker.tamersunion.org:443/announce", maxHashesPerRequest: 50 }, // anime-focused community tracker
+    { url: "https://opentracker.i2p.rocks:443/announce", maxHashesPerRequest: 50 }, // also serves i2p network
+    { url: "https://tracker.ghostchu-services.top:443/announce", maxHashesPerRequest: 50 },
+    { url: "https://tracker.bt4g.com:443/announce", maxHashesPerRequest: 50 }, // run by bt4g.com search engine
+    { url: "https://tracker.zhuqiy.com:443/announce", maxHashesPerRequest: 50 }, // Chinese tracker
+    { url: "https://tracker.yemekyedim.com:443/announce", maxHashesPerRequest: 50 }, // Turkish tracker
+    { url: "https://tracker.pmman.tech:443/announce", maxHashesPerRequest: 50 },
+    { url: "https://tracker.nekomi.cn:443/announce", maxHashesPerRequest: 50 }, // Chinese, anime-focused
+    { url: "https://tracker.7471.top:443/announce", maxHashesPerRequest: 50 }, // Chinese tracker
+    { url: "https://torrents.tmtime.dev:443/announce", maxHashesPerRequest: 50 },
+    { url: "https://open.ftorrent.com:443/announce", maxHashesPerRequest: 50 },
 ];
 
 type ScrapeResponseData = {

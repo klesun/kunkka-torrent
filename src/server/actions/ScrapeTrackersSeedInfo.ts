@@ -46,6 +46,21 @@ export const trackerRecords: TrackerRecord[] = [
 
     { url: "udp://tracker1.bt.moack.co.kr:80/announce", maxHashesPerRequest: 50 },
 
+    { url: "udp://tracker.openbittorrent.com:80/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.openbittorrent.com:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://open.demonii.com:1337/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.dler.org:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.altrosky.cc:6969/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.bitsearch.to:1337/announce", maxHashesPerRequest: 75 },
+
+    { url: "udp://bt1.archive.org:6969/announce", maxHashesPerRequest: 50 },
+    { url: "udp://bt2.archive.org:6969/announce", maxHashesPerRequest: 50 },
+    { url: "http://tracker.gbitt0.info:80/announce", maxHashesPerRequest: 50 },
+    { url: "https://tracker.gbitt0.info:443/announce", maxHashesPerRequest: 50 },
+    { url: "https://tracker.tamersunion.org:443/announce", maxHashesPerRequest: 50 },
+    { url: "udp://ipv4.tracker.harry.lu:80/announce", maxHashesPerRequest: 50 },
+    { url: "https://opentracker.i2p.rocks:443/announce", maxHashesPerRequest: 50 },
+
     // timeouts often
     //{url: 'udp://tracker0.ufibox.com:6969/announce', maxHashesPerRequest: 75},
 ];

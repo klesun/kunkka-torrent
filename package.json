@@ -2,6 +2,7 @@
     "name": "kunkka-torrent",
     "scripts": {
         "start": "npx vite-node server.ts",
+        "scrape-nya": "vite-node scripts/scrape_nyaa_si.ts",
         "parse-nya": "vite-node scripts/parse_nyaa_si_scrapes.ts",
         "add-fts": "vite-node scripts/add_fts_indexes.ts"
     },

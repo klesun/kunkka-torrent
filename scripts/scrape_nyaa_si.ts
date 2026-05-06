@@ -10,7 +10,8 @@ import {promises as fs} from 'fs';
  *     I'll probably try to slowly decrease this delay and see if I won't get banned
  */
 
-const baseDir = __dirname + '/../data/nyaa_si_scrapes';
+// language=file-reference
+const baseDir = __dirname + '/' + '../data/nyaa_si_scrapes';
 
 const CHUNK_SIZE = 1000;
 const MIN_DELAY = 150;
@@ -18,18 +19,18 @@ const MAX_DELAY = 350;
 
 const main = async () => {
     let ddosErrors = 0;
-    for (let i = 2027617; i <= 2027617; ++i) {
+    for (let i = 0; i <= 2106597; ++i) {
         const relIndex = (i - 1) % CHUNK_SIZE;
         const chunkDir = baseDir + '/' + (i - relIndex) + '_' + (i - relIndex - 1 + CHUNK_SIZE);
         if (relIndex === 0) {
             await fs.mkdir(chunkDir, {recursive: true})
         }
         
-        // const url = 'https://nyaa.si/view/' + i;
-        const url = 'https://nyaa-si-proxy.azurewebsites.net/nyaa.si/view/' + i;
+        const url = 'https://nyaa.si/view/' + i;
+        // const url = 'https://nyaa-si-proxy.azurewebsites.net/nyaa.si/view/' + i;
         const options = {
             headers: {
-                // 'user-agent': 'torrent.klesun.net/af4a607a90e71c5ce9f8157442c813cd09a539c3 infohashes crawler script',
+                'user-agent': 'github.com/klesun/kunkka-torrent/commit/840e071a292135aa2bfd8ac86b0b9462c44d3dae infohashes crawler script',
             },
         };
         let lastError = null;

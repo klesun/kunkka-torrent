@@ -42,7 +42,7 @@ const Server = async (rootPath: string) => {
                         messageType: "INFO_HASH_STATUS",
                         messageData: itemStatus,
                     });
-                    ScanInfoHashStatus({ infoHashes, itemCallback, api });
+                    ScanInfoHashStatus({ infoHashes, itemCallback });
                     reply({ status: "SCANNING_STARTED" });
                 } catch (exc) {
                     reply({ status: "ERROR", message: exc + "" });

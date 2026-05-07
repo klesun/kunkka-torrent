@@ -59,6 +59,7 @@
         "@types/react-dom": "^18.3.7",
         "@types/socket.io": "^2.0.0",
         "@types/torrent-stream": "0.0.5",
+        "@types/webtorrent": "^0.110.1",
         "@typescript-eslint/eslint-plugin": "^8.46.0",
         "@typescript-eslint/parser": "^8.46.0",
         "buffer": "^6.0.3",

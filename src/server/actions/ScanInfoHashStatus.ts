@@ -1,7 +1,6 @@
-import type { IApi } from "../Api.ts";
-import TorrentFile = TorrentStream.TorrentFile;
+import { backend } from "../torrent-backends/ActiveBackend";
+import type { TorrentInfo } from "../torrent-backends/ITorrentBackend";
 
-const torrentStream = require("torrent-stream");
 const { timeout } = require("klesun-node-tools/src/Utils/Lang.js");
 
 type BaseItemStatus = {
@@ -27,34 +26,11 @@ export type ItemStatus = BaseItemStatus & ({
     status: "TIMEOUT",
 });
 
-export const shortenFileInfo = (f: TorrentFile): ShortTorrentFileInfo => ({
-    path: f.path, length: f.length,
-});
-
-export type TorrentMainInfo = {
-    name: string,
-    length: number,
-    files: TorrentFile[],
-};
-
-export const shortenTorrentInfo = (torrent: TorrentMainInfo) => ({
-    name: torrent.name,
-    length: torrent.length,
-    files: torrent.files.map(shortenFileInfo),
-});
-
-export type TorrentInfo = ReturnType<typeof shortenTorrentInfo>;
-export type ShortTorrentFileInfo = {
-    path: string,
-    length: number,
-};
-
 const MAX_META_WAIT_SECONDS = 45;
 
-const ScanInfoHashStatus = ({ infoHashes, itemCallback, api}: {
+const ScanInfoHashStatus = ({ infoHashes, itemCallback }: {
     infoHashes: string[],
     itemCallback: (status: ItemStatus) => void,
-    api: IApi,
 }) => {
     for (const infoHash of infoHashes) {
         if (!infoHash.match(/^[a-fA-F0-9]{40}$/)) {
@@ -66,30 +42,7 @@ const ScanInfoHashStatus = ({ infoHashes, itemCallback, api}: {
     //  you schedule real big amount, like 600 at once
     for (const infoHash of infoHashes) {
         const startedMs = Date.now();
-        // const whenEngine = api.getPreparingStream(infoHash);
-        // if (whenEngine) {
-        //     whenEngine.then(engine => {
-        //         const metaInfo = shortenTorrentInfo({
-        //             name: 'huj',
-        //             length: engine.files.map(f => f.length).reduce((a, b) => a + b, 0),
-        //             files: engine.files,
-        //         });
-        //         itemCallback({
-        //             infoHash: infoHash,
-        //             status: 'META_AVAILABLE',
-        //             msWaited: (Date.now() - startedMs),
-        //             metaInfo: metaInfo,
-        //         });
-        //     });
-        //     continue;
-        // }
-
-        const engine = torrentStream("magnet:?xt=urn:btih:" + infoHash);
-        const whenMeta = new Promise<TorrentInfo>(resolve => {
-            engine.on("torrent", async (torrent: TorrentMainInfo) => {
-                resolve(shortenTorrentInfo(torrent));
-            });
-        });
+        const { whenMeta, cancel } = backend.startMeta(infoHash);
         timeout(MAX_META_WAIT_SECONDS, whenMeta)
             .then((metaInfo: TorrentInfo) => {
                 itemCallback({
@@ -115,7 +68,7 @@ const ScanInfoHashStatus = ({ infoHashes, itemCallback, api}: {
                     });
                 }
             })
-            .finally(() => engine.destroy());
+            .finally(cancel);
     }
 };
 

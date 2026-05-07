@@ -469,12 +469,9 @@ type Action = (rq: http.IncomingMessage, rs: http.ServerResponse) => Promise<Ser
 type ActionForApi = (api: IApi) => Action;
 
 const apiRouter: Record<string, ActionForApi> = {
-    "/api/checkInfoHashMeta": api => api.checkInfoHashMeta,
-    "/api/checkInfoHashPeers": api => api.checkInfoHashPeers,
     "/api/getFfmpegInfo": api => api.getFfmpegInfo,
     "/api/connectToSwarm": api => api.connectToSwarm,
     "/api/getSwarmInfo": api => api.getSwarmInfo,
-    "/api/printDetailedSwarmInfo": api => api.printDetailedSwarmInfo,
     "/api/downloadTorrentFile": api => api.downloadTorrentFile,
     "/api/findTorrentsInLocalDb": api => api.findTorrentsInLocalDb,
     "/api/qbtv2/search/start": api => api.qbtv2.search.start,

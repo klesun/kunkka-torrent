@@ -114,7 +114,8 @@ export type AppInfohash = ReturnType<typeof deserialize>;
 const Infohashes = () => {
     const table = "Infohashes";
     const dbPool = DbPool({
-        filename: __dirname + "/../../../data/db/" + table + ".sqlite",
+        // language=file-reference
+        filename: __dirname + "/" + "../../../data/db/Infohashes.sqlite",
     });
 
     return {

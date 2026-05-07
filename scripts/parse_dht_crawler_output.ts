@@ -40,7 +40,9 @@ const saveToArchiveDb = async (records: DhtRecord[]) => {
 
 /** @see https://github.com/shiyanhui/dht */
 const main = async () => {
-    const dhtOutPath = __dirname + '/../kunkka_host/handmaide/random/kunkka_big_data/shiyanhui_dht_out.txt';
+    // language=file-reference
+    const dhtOutPath = __dirname + '/' + '../data/dht_crawl.txt';
+    // const dhtOutPath = __dirname + '/../kunkka_host/handmaide/random/kunkka_big_data/shiyanhui_dht_out.txt';
     const fileStream = fsSync.createReadStream(dhtOutPath);
 
     const linesStream = readline.createInterface({
@@ -55,13 +57,18 @@ const main = async () => {
             continue;
         }
         ++i;
-        if (i % 10000 === 0) {
+        if (i % 100 === 0) {
             console.log(i, line);
             const records = [...infohashToRecord.values()];
             await saveToArchiveDb(records);
             infohashToRecord = new Map();
         }
-        const record: DhtRecord | DhtRecord[] = JSON.parse(line);
+        let record: DhtRecord | DhtRecord[];
+        try {
+            record = JSON.parse(line);
+        } catch {
+            continue;
+        }
         const records: DhtRecord[] = Array.isArray(record) ? record : [record];
         for (const record of records) {
 		  if (!record.length && !record.files) {

@@ -4,6 +4,7 @@
         "start": "npx vite-node server.ts",
         "scrape-nya": "vite-node scripts/scrape_nyaa_si.ts",
         "parse-nya": "vite-node scripts/parse_nyaa_si_scrapes.ts",
+        "parse-dht": "vite-node scripts/parse_dht_crawler_output.ts",
         "add-fts": "vite-node scripts/add_fts_indexes.ts"
     },
     "version": "0.0.1",
@@ -41,11 +42,10 @@
         "torrent-stream": "^1.2.0",
         "torrent-tracker": "https://github.com/klesun-productions/torrent-tracker/tarball/f83d4adfe6de745041cc38dbd4f21b4cce1129c6",
         "unzip-stream": "^0.3.1",
-        "vite-node": "^3.2.4"
+        "vite-node": "^3.2.4",
+        "webtorrent": "^2.8.5"
     },
     "devDependencies": {
-        "piratebay-db-dump": "git+https://github.com/darksun-misc/piratebay-db-dump.git#06fa7b1a9285e27aefb00e46e49442376ea4953d",
-        "torrents-csv-data": "git+https://codeberg.org/klesun/torrents-csv-data.git#e739231a782f64d4ba264b1606775248e8e4ff5a",
         "@eslint/compat": "^1.4.0",
         "@stylistic/eslint-plugin": "^5.4.0",
         "@types/jsdom": "^27.0.0",
@@ -66,7 +66,9 @@
         "eslint": "^9.37.0",
         "eslint-plugin-import": "^2.32.0",
         "path-browserify": "^1.0.1",
+        "piratebay-db-dump": "git+https://github.com/darksun-misc/piratebay-db-dump.git#06fa7b1a9285e27aefb00e46e49442376ea4953d",
         "stream-browserify": "^3.0.0",
+        "torrents-csv-data": "git+https://codeberg.org/klesun/torrents-csv-data.git#e739231a782f64d4ba264b1606775248e8e4ff5a",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.46.0",
         "webpack": "^5.11.0",

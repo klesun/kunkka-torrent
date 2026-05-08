@@ -35,7 +35,7 @@ const main = async () => {
 
     // language=file-reference
     const appComponentPath = "./Search.tsx";
-    loadModule(appComponentPath, { jsx: "react" }).then(async ({ default: Search }) => {
+    await loadModule(appComponentPath, { jsx: "react" }).then(async ({ default: Search }) => {
         const localResults = await whenLocalResults;
         const { id } = await started;
         const appProps = { qbtv2SearchId: id, localResults };

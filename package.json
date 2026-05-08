@@ -20,7 +20,7 @@
     "license": "ISC",
     "dependencies": {
         "@curveball/http-errors": "^0.4.0",
-        "@mhc/utils": "git://github.com/MHCAviation/utils#b06da51abbbc363297ff7f5e503ed519618687ce",
+        "@mhc/utils": "git://github.com/MHCAviation/utils#f6033f27f16857694a4a2d12069d2e16fe4e4da0",
         "@swc/core": "^1.13.5",
         "@swc/helpers": "^0.5.17",
         "eslint-plugin-unused-imports": "^4.2.0",

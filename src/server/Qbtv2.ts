@@ -2,6 +2,7 @@ import type * as http from "http";
 import { BadGateway } from "@curveball/http-errors";
 import { readPost } from "./utils/Http";
 import { fail } from "node:assert";
+import { stringifyError } from "@mhc/utils/src/errorHandling";
 
 /**
  * a mapping to the Web API of qbittorrent
@@ -26,7 +27,12 @@ const Qbtv2 = ({ port = 44011 } = {}) => {
                     body: await readPost(rq),
                     credentials: "include",
                 };
-                const fetchRs = await fetch(url, params);
+                let fetchRs;
+                try {
+                    fetchRs = await fetch(url, params);
+                } catch (error) {
+                    throw new BadGateway("Transport error while connecting to qbt: " + stringifyError(error));
+                }
                 // extracting cookie on server side would be much better, but I failed
                 // to make it work from get-go, would need to spend some time...
                 fetchRs.headers.forEach((value: string, name: string) => {

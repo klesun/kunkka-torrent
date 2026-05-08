@@ -1,0 +1,6 @@
+#cloud-config
+# After VM creation, place storage key in /etc/kunkka-storage.key then run docker/vm-start.sh
+runcmd:
+  - curl -fsSL https://get.docker.com | sh
+  - apt-get install -y cifs-utils -qq
+  - curl -sL https://aka.ms/InstallAzureCLIDeb | bash

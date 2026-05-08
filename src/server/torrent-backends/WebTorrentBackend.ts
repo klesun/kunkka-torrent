@@ -40,7 +40,7 @@ export class WebTorrentBackend implements ITorrentBackend {
             this.infoHashToWhenReady[infoHash] = new Promise<TorrentEngineLike>(resolve => {
                 this.client.add(magnetLink, {
                     announce: trackers.length !== 0 ? trackers : trackerRecords.map(t => t.url),
-                    path: "/mnt/kunkka-db-files/webtorrent-downloads",
+                    path: DOWNLOADS_PATH,
                     deselect: true,
                 }, torrent => {
                     this.infoHashToTorrent[infoHash] = torrent;

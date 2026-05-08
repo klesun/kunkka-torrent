@@ -8,7 +8,7 @@ const util = require("util");
 const execFile = util.promisify(require("child_process").execFile);
 import * as fs from "fs";
 import * as parseTorrent from "parse-torrent";
-import {BadGateway, BadRequest, NotFound, NotImplemented, ServiceUnavailable} from "@curveball/http-errors";
+import { BadGateway, BadRequest, NotFound, NotImplemented, ServiceUnavailable } from "@curveball/http-errors";
 import TorrentNamesFts from "./repositories/TorrentNamesFts";
 import { trackerRecords } from "./actions/ScrapeTrackersSeedInfo";
 import Infohashes from "./repositories/Infohashes";
@@ -168,9 +168,9 @@ const Api = () => {
     const findTorrentsInLocalDb = async (req: http.IncomingMessage) => {
         const { userInput } = <Record<string, string>>url.parse(<string>req.url, true).query;
         const ftsRows = await torrentNamesFts.select(userInput)
-            .catch((error: null | undefined | { code?: 'SQLITE_CANTOPEN' | unknown }) => {
-                if (error?.code === 'SQLITE_CANTOPEN') {
-                    throw new ServiceUnavailable('Local Infohashes DB file is missing on the server');
+            .catch((error: null | undefined | { code?: "SQLITE_CANTOPEN" | unknown }) => {
+                if (error?.code === "SQLITE_CANTOPEN") {
+                    throw new ServiceUnavailable("Local Infohashes DB file is missing on the server");
                 } else {
                     throw error;
                 }

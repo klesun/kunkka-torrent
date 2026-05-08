@@ -277,7 +277,7 @@ function computeMergedRecords(
         let tracker = "";
         if (r.descrLink) {
             try {
-                tracker =new URL(r.descrLink).hostname ;
+                tracker = new URL(r.descrLink).hostname ;
             } catch (error) {
                 console.warn("Invalid tracker dscrLink URL - " + r.descrLink + " - in filae: " + r.fileUrl);
                 console.warn(error);

@@ -1,5 +1,6 @@
 import { backend } from "../torrent-backends/ActiveBackend";
-import {shortenTorrentInfo, TorrentInfo} from "../torrent-backends/ITorrentBackend";
+import type { TorrentInfo } from "../torrent-backends/ITorrentBackend";
+import { shortenTorrentInfo } from "../torrent-backends/ITorrentBackend";
 
 const { timeout } = require("klesun-node-tools/src/Utils/Lang.js");
 

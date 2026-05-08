@@ -1,5 +1,4 @@
-import type { TorrentInfo, TorrentMainInfo } from "./ITorrentBackend";
-import { shortenTorrentInfo } from "./ITorrentBackend";
+import type { TorrentMainInfo } from "./ITorrentBackend";
 import { trackerRecords } from "../actions/ScrapeTrackersSeedInfo";
 import type { ITorrentBackend, ITorrentFile, TorrentEngineLike, SwarmSummary } from "./ITorrentBackend";
 

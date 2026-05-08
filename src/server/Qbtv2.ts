@@ -1,7 +1,7 @@
 import type * as http from "http";
 import { BadGateway } from "@curveball/http-errors";
 import { readPost } from "./utils/Http";
-import {fail} from "node:assert";
+import { fail } from "node:assert";
 
 /**
  * a mapping to the Web API of qbittorrent

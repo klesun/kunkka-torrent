@@ -2,10 +2,10 @@
 import * as Papaparse from "papaparse";
 import * as fsSync from "fs";
 import type { HandleHttpParams } from "../HandleHttpRequest";
-import {InternalServerError, ServiceUnavailable} from "@curveball/http-errors";
+import { InternalServerError } from "@curveball/http-errors";
 import Infohashes from "../repositories/Infohashes";
 import type { InfohashDbRow } from "../typing/InfohashDbRow";
-import {IS_AZURE_ENV} from "../Constants.ts";
+import { IS_AZURE_ENV } from "../Constants.ts";
 
 const fs = fsSync.promises;
 const Xml = require("klesun-node-tools/src/Utils/Xml.js");
@@ -24,7 +24,7 @@ type TorrentsCsvRecordFull = TorrentsCsvRecord & {
     infohash: string,
 };
 
-const dbFilesDir = IS_AZURE_ENV ? '/mnt/kunkka-db-files' : __dirname + '/../../../node_modules/torrents-csv-data';
+const dbFilesDir = IS_AZURE_ENV ? "/mnt/kunkka-db-files" : __dirname + "/../../../node_modules/torrents-csv-data";
 
 // I have 28 GiB of RAM, so I don't mind keeping whole CSV here... for now at least
 // Upd. 2026: I mind, Azure RAM don't grow on trees T_T
@@ -103,9 +103,9 @@ function normalizeLocalDbRecord(localDbRecord: InfohashDbRow): NormalizedRecord 
 const ServeInfoPage = async (params: HandleHttpParams, infoHash: string) => {
     const whenCsvRecord = getInfohashRecord(infoHash);
     const whenLocalDbRecord = Infohashes().selectOne(infoHash)
-        .catch((error: null | undefined | { code?: 'SQLITE_CANTOPEN' | unknown }) => {
-            if (error?.code === 'SQLITE_CANTOPEN') {
-                console.warn('Local Infohashes DB file is missing on the server');
+        .catch((error: null | undefined | { code?: "SQLITE_CANTOPEN" | unknown }) => {
+            if (error?.code === "SQLITE_CANTOPEN") {
+                console.warn("Local Infohashes DB file is missing on the server");
                 return undefined;
             } else {
                 throw error;

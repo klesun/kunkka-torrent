@@ -1,9 +1,9 @@
-import WebTorrent, {Torrent} from "webtorrent";
+import type { Torrent } from "webtorrent";
+import WebTorrent from "webtorrent";
 import type { TorrentInfo } from "./ITorrentBackend";
-import { shortenTorrentInfo } from "./ITorrentBackend";
 import { trackerRecords } from "../actions/ScrapeTrackersSeedInfo";
 import type { ITorrentBackend, TorrentEngineLike, SwarmSummary } from "./ITorrentBackend";
-import {IS_AZURE_ENV} from "../Constants.ts";
+import { IS_AZURE_ENV } from "../Constants.ts";
 
 declare module "webtorrent" {
     interface TorrentOptions {

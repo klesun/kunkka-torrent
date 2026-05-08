@@ -1,6 +1,4 @@
-import type { Torrent } from "webtorrent";
 import WebTorrent from "webtorrent";
-import type { TorrentInfo } from "./ITorrentBackend";
 import { trackerRecords } from "../actions/ScrapeTrackersSeedInfo";
 import type { ITorrentBackend, TorrentEngineLike, SwarmSummary } from "./ITorrentBackend";
 import { IS_AZURE_ENV } from "../Constants.ts";
@@ -63,26 +61,6 @@ export class WebTorrentBackend implements ITorrentBackend {
             downloaded: torrent.downloaded,
             downloadSpeed: torrent.downloadSpeed,
             peers: torrent.numPeers,
-        };
-    }
-
-    startMeta(infoHash: string): { whenMeta: Promise<TorrentInfo>, cancel(): void } {
-        const whenMeta = new Promise<Torrent>(resolve => {
-            this.client.add("magnet:?xt=urn:btih:" + infoHash, { deselect: true }, torrent => {
-                resolve(torrent);
-                if (!this.infoHashToWhenReady[infoHash]) {
-                    this.client.remove(torrent, { destroyStore: true })
-                        .catch((error) => console.warn("Failed to remove meta info torrent", torrent, error));
-                }
-            });
-        });
-        return {
-            whenMeta,
-            cancel: () => whenMeta.then(torrent => {
-                if (!this.infoHashToWhenReady[infoHash]) {
-                    return this.client.remove(torrent, { destroyStore: true });
-                }
-            }),
         };
     }
 }

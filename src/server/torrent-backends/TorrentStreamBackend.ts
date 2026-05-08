@@ -92,16 +92,4 @@ export class TorrentStreamBackend implements ITorrentBackend {
         if (!engine) { throw new Error("engine not found for infoHash"); }
         return makeSwarmSummary(engine.swarm);
     }
-
-    startMeta(infoHash: string): { whenMeta: Promise<TorrentMainInfo>, cancel(): void } {
-        const engine: NowadaysEngine = torrentStream("magnet:?xt=urn:btih:" + infoHash);
-        const whenMeta = new Promise<TorrentMainInfo>(resolve => {
-            engine.on("torrent", (torrent: TorrentMainInfo) => {
-                resolve(torrent);
-            });
-        });
-        return { whenMeta, cancel: () => engine.destroy() };
-    }
-
-
 }

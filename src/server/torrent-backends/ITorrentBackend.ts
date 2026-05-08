@@ -43,5 +43,4 @@ export interface ITorrentBackend {
     /** add to the persistent streaming client, resolve when metadata + files are ready */
     prepareTorrentStream(infoHash: string, trackers: string[]): Promise<TorrentEngineLike>,
     swarmSummary(infoHash: string): SwarmSummary,
-    startMeta(infoHash: string): { whenMeta: Promise<TorrentMainInfo>, cancel(): void },
 }

@@ -3,9 +3,8 @@ import ExternalTrackMatcher, { SUBS_EXTENSIONS, VIDEO_EXTENSIONS, GOOD_AUDIO_EXT
 import FixNaturalOrder from "../../src/common/FixNaturalOrder.js";
 import type { IApi_connectToSwarm_rs, IApi_getSwarmInfo_rs } from "../../src/server/Api.ts";
 import type { ShortTorrentFileInfo } from "../../src/server/torrent-backends/ITorrentBackend";
-import type { FfprobeAudioStream, FfprobeStream } from "../../src/client/FfprobeOutput";
-import { FfprobeOutput } from "../../src/client/FfprobeOutput";
-import type { FileHeader } from "../../node_modules/node-unrar-js/src/js/extractor";
+import type { FfprobeOutput, FfprobeAudioStream, FfprobeStream } from "../../src/client/FfprobeOutput.ts";
+import type { FileHeader } from "node-unrar-js/src/js/extractor.ts";
 
 const { React, ReactDOM } = window;
 const { useEffect, useState, useRef } = React;

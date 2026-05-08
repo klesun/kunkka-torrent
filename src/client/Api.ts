@@ -3,7 +3,7 @@ import type { AppInfohash } from "../server/repositories/Infohashes";
 import type { JsonStringified, JsonValue, Pathname } from "@mhc/utils/types/utility";
 import type { IApi_connectToSwarm_rs, IApi_getSwarmInfo_rs } from "../server/Api.ts";
 import type { QbtSearchResult } from "./QbtSearch";
-import type { FfprobeOutput } from "./FfprobeOutput";
+import type { FfprobeOutput } from "./FfprobeOutput.ts";
 import { get, makeGetUrl, postWwwForm } from "./ApiUntyped";
 
 export type api_findTorrentsInLocalDb_DbRow = AppInfohash;

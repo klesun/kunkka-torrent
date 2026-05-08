@@ -24,4 +24,4 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo Published to VM.
-curl http://20.123.24.242/
+curl http://20.123.24.242/ping

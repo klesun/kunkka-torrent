@@ -57,7 +57,7 @@ type FfprobeAudioStreamTags = {
     language?: string,
 };
 
-type FfprobeAudioStream = AudioStreamBase & {
+export type FfprobeAudioStream = AudioStreamBase & {
     "sample_fmt": "fltp",
     "sample_rate": "48000",
     "channels": 6,

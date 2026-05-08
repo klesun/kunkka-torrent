@@ -478,6 +478,8 @@ const apiRouter: Record<string, ActionForApi> = {
     "/api/qbtv2/search/results": api => api.qbtv2.search.results,
 };
 
+const appStartTime = new Date().toISOString();
+
 const HandleHttpRequest = async (params: HandleHttpParams) => {
     const { rq, rs, rootPath, api } = params;
     const parsedUrl = url.parse(<string>rq.url);
@@ -502,6 +504,10 @@ const HandleHttpRequest = async (params: HandleHttpParams) => {
                 rs.statusCode = 200;
                 rs.end(JSON.stringify(result));
             });
+    } else if (pathname === "/ping") {
+        rs.setHeader("Content-Type", "application/json");
+        rs.statusCode = 200;
+        rs.end(JSON.stringify({ appStartTime }));
     } else if (pathname === "/torrent-stream") {
         return serveTorrentStream(params);
     } else if (pathname === "/torrent-stream-subs-ensure-vtt") {

@@ -21,6 +21,6 @@ echo Published. Waiting 60 seconds for warmup...
 ping 127.0.0.1 -n 61 > nul
 echo Making warmup call...
 echo %time%
-call curl https://kunkka-torrent.azurewebsites.net/
+call curl https://kunkka-torrent.azurewebsites.net/ping
 echo.
 echo %time%

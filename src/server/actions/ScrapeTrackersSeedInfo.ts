@@ -2,12 +2,16 @@
 // @ts-ignore
 import Tracker = require("torrent-tracker");
 
-type TrackerRecord = {
+type TrackerRecordBase = {
     url: string,
     maxHashesPerRequest: number,
 };
 
-export const trackerRecords: TrackerRecord[] = [
+type TrackerRecord = TrackerRecordBase & {
+    instance: Tracker,
+};
+
+export const trackerRecords: TrackerRecord[] = ([
     { url: "udp://9.rarbg.to:2920/announce", maxHashesPerRequest: 101 },
 
     { url: "udp://opentor.org:2710/announce", maxHashesPerRequest: 75 },
@@ -55,9 +59,6 @@ export const trackerRecords: TrackerRecord[] = [
 
     { url: "udp://bt1.archive.org:6969/announce", maxHashesPerRequest: 50 },
     { url: "udp://bt2.archive.org:6969/announce", maxHashesPerRequest: 50 },
-    { url: "http://tracker.gbitt0.info:80/announce", maxHashesPerRequest: 50 },
-    { url: "https://tracker.gbitt0.info:443/announce", maxHashesPerRequest: 50 },
-    { url: "https://tracker.tamersunion.org:443/announce", maxHashesPerRequest: 50 },
     { url: "udp://ipv4.tracker.harry.lu:80/announce", maxHashesPerRequest: 50 },
     { url: "https://opentracker.i2p.rocks:443/announce", maxHashesPerRequest: 50 },
 
@@ -108,7 +109,7 @@ export const trackerRecords: TrackerRecord[] = [
     { url: "https://tracker.7471.top:443/announce", maxHashesPerRequest: 50 }, // Chinese tracker
     { url: "https://torrents.tmtime.dev:443/announce", maxHashesPerRequest: 50 },
     { url: "https://open.ftorrent.com:443/announce", maxHashesPerRequest: 50 },
-];
+] satisfies TrackerRecordBase[]).map(r => ({ ...r, instance: new Tracker(r.url) }));
 
 type ScrapeResponseData = {
     seeders: number,
@@ -126,7 +127,7 @@ type Scrape = ScrapeResponseData & {
  * parallelize them, but I do not want to get my ip banned
  */
 const scrapeTracker = async function*(tr: TrackerRecord, infohashes: string[]): AsyncGenerator<Scrape> {
-    const tracker = new Tracker(tr.url);
+    const tracker: Tracker = tr.instance;
     for (let i = 0; i < infohashes.length; i += tr.maxHashesPerRequest) {
         const chunk = infohashes.slice(i, i + tr.maxHashesPerRequest);
         let msg;

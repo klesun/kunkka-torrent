@@ -272,7 +272,15 @@ function computeMergedRecords(
     }));
 
     const normalizedFromQbtv = qbtvResults.map((r): QbtSearchResultItemExtended => {
-        const tracker = r.descrLink ? new URL(r.descrLink).hostname : "";
+        let tracker = "";
+        if (r.descrLink) {
+            try {
+                tracker =new URL(r.descrLink).hostname ;
+            } catch (error) {
+                console.warn("Invalid tracker dscrLink URL - " + r.descrLink + " - in filae: " + r.fileUrl);
+                console.warn(error);
+            }
+        }
         const mediaType = TorrentNameParser({ name: r.fileName, tracker }).parts[0].mediaType;
         const parsedMagnet: null | { infoHash: string } = parseMagnetUrl(r.fileUrl);
         return {

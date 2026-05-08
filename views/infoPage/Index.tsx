@@ -3,7 +3,8 @@ import ExternalTrackMatcher, { SUBS_EXTENSIONS, VIDEO_EXTENSIONS, GOOD_AUDIO_EXT
 import FixNaturalOrder from "../../src/common/FixNaturalOrder.js";
 import type { IApi_connectToSwarm_rs, IApi_getSwarmInfo_rs } from "../../src/server/Api.ts";
 import type { ShortTorrentFileInfo } from "../../src/server/torrent-backends/ITorrentBackend";
-import type { FfprobeOutput, FfprobeStream } from "../../src/client/FfprobeOutput";
+import type { FfprobeAudioStream, FfprobeStream } from "../../src/client/FfprobeOutput";
+import { FfprobeOutput } from "../../src/client/FfprobeOutput";
 import type { FileHeader } from "../../node_modules/node-unrar-js/src/js/extractor";
 
 const { React, ReactDOM } = window;
@@ -99,16 +100,14 @@ function StreamItem({ stream }: { stream: FfprobeStream & { codec_type: Exclude<
     </label>;
 }
 
-type FfprobeAudioStream = FfprobeStream & { codec_type: "audio" };
-
 function AudioStreamItem({ stream, onSelected }: {
     stream: FfprobeAudioStream,
     onSelected: () => void,
 }) {
     const { codec_name, profile, codec_type } = stream;
 
-    const { sample_fmt, sample_rate, channels, tags = {}, ...rest } = stream;
-    const { language, title } = tags;
+    const { sample_fmt, sample_rate, channels, tags, ...rest } = stream;
+    const { language, title } = tags ?? {};
     const typeInfo = <span>
         <span>{language || ""}</span>
         <span>{title || ""}</span>
@@ -451,7 +450,7 @@ function ExtractedRarFileView({ src }: { src: string }) {
     useEffect(() => {
         fetch(src).then(async rs => {
             const RarStreamer = await getRarStreamer();
-            const reader = rs.body!.getReader();
+            const reader = (rs.body ?? neverNull()).getReader();
             const iterating = RarStreamer({ reader });
             setIterating(iterating);
             let filesLoaded = 0;

@@ -4,6 +4,7 @@ type StaticStreamBase = {
     "codec_tag": "0x0000",
     "time_base": "1/1000",
     "start_time": "0.000000",
+    "profile"?: never,
 };
 
 type VideoStreamBase = {
@@ -30,6 +31,7 @@ type SubtitleStreamBase = {
     "codec_long_name": "SubRip subtitle" | string,
     "codec_type": "subtitle",
     "codec_time_base": "0/1" | string,
+    "profile"?: never,
 };
 
 type AttachmentStreamBase = {
@@ -38,10 +40,46 @@ type AttachmentStreamBase = {
     "codec_long_name": never,
     "codec_type": "attachment",
     "codec_time_base": never,
-    "tags": { "filename":"verdanab.ttf","mimetype":"font/ttf" },
+    "profile"?: never,
+    "tags": {
+        "filename":"verdanab.ttf",
+        "mimetype":"font/ttf",
+        title?: never,
+    },
 };
 
 type StreamBase = StaticStreamBase & (VideoStreamBase | AudioStreamBase | SubtitleStreamBase | AttachmentStreamBase);
+
+type FfprobeAudioStreamTags = {
+    "HANDLER_NAME":"SoundHandler",
+    "DURATION":"00:24:35.167000000",
+    title?: string,
+    language?: string,
+};
+
+type FfprobeAudioStream = AudioStreamBase & {
+    "sample_fmt": "fltp",
+    "sample_rate": "48000",
+    "channels": 6,
+    "channel_layout": "5.1",
+    "bits_per_sample": 0,
+    "start_pts": 0,
+    "disposition": {
+        "default": 1,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+    },
+    "tags": FfprobeAudioStreamTags,
+};
 
 export type FfprobeStream = VideoStreamBase & {
     "width": 1440,
@@ -76,30 +114,12 @@ export type FfprobeStream = VideoStreamBase & {
         "attached_pic": 0,
         "timed_thumbnails": 0,
     },
-    "tags": { "HANDLER_NAME":"VideoHandler","DURATION":"00:24:35.162000000" },
-} | AudioStreamBase & {
-    "sample_fmt": "fltp",
-    "sample_rate": "48000",
-    "channels": 6,
-    "channel_layout": "5.1",
-    "bits_per_sample": 0,
-    "start_pts": 0,
-    "disposition": {
-        "default": 1,
-        "dub": 0,
-        "original": 0,
-        "comment": 0,
-        "lyrics": 0,
-        "karaoke": 0,
-        "forced": 0,
-        "hearing_impaired": 0,
-        "visual_impaired": 0,
-        "clean_effects": 0,
-        "attached_pic": 0,
-        "timed_thumbnails": 0,
+    "tags": {
+        "HANDLER_NAME": "VideoHandler",
+        "DURATION": "00:24:35.162000000",
+        title?: never,
     },
-    "tags": { "HANDLER_NAME":"SoundHandler","DURATION":"00:24:35.167000000" },
-} | SubtitleStreamBase & {
+} | FfprobeAudioStream | SubtitleStreamBase & {
     "start_pts": 0,
     "duration_ts": 1475167,
     "duration": "1475.167000",
@@ -133,6 +153,7 @@ export type FfprobeStream = VideoStreamBase & {
         "_STATISTICS_TAGS": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES",
         "_STATISTICS_TAGS-eng": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES",
         "DURATION": "00:23:40.729000000",
+        title?: string,
     },
 } | SubtitleStreamBase & {
     "r_frame_rate": "0/0",

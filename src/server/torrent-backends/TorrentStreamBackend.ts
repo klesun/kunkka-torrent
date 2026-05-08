@@ -94,11 +94,11 @@ export class TorrentStreamBackend implements ITorrentBackend {
         return makeSwarmSummary(engine.swarm);
     }
 
-    startMeta(infoHash: string): { whenMeta: Promise<TorrentInfo>, cancel(): void } {
+    startMeta(infoHash: string): { whenMeta: Promise<TorrentMainInfo>, cancel(): void } {
         const engine: NowadaysEngine = torrentStream("magnet:?xt=urn:btih:" + infoHash);
-        const whenMeta = new Promise<TorrentInfo>(resolve => {
+        const whenMeta = new Promise<TorrentMainInfo>(resolve => {
             engine.on("torrent", (torrent: TorrentMainInfo) => {
-                resolve(shortenTorrentInfo(torrent));
+                resolve(torrent);
             });
         });
         return { whenMeta, cancel: () => engine.destroy() };

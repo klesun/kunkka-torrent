@@ -1,5 +1,5 @@
 import { backend } from "../torrent-backends/ActiveBackend";
-import type { TorrentInfo } from "../torrent-backends/ITorrentBackend";
+import {shortenTorrentInfo, TorrentInfo} from "../torrent-backends/ITorrentBackend";
 
 const { timeout } = require("klesun-node-tools/src/Utils/Lang.js");
 
@@ -49,7 +49,7 @@ const ScanInfoHashStatus = ({ infoHashes, itemCallback }: {
                     infoHash: infoHash,
                     status: "META_AVAILABLE",
                     msWaited: (Date.now() - startedMs),
-                    metaInfo: metaInfo,
+                    metaInfo: shortenTorrentInfo(metaInfo),
                 });
             })
             .catch((exc: { httpStatusCode: number }|object|string|number|undefined|boolean|null) => {

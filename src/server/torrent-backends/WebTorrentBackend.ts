@@ -1,8 +1,9 @@
-import WebTorrent from "webtorrent";
+import WebTorrent, {Torrent} from "webtorrent";
 import type { TorrentInfo } from "./ITorrentBackend";
 import { shortenTorrentInfo } from "./ITorrentBackend";
 import { trackerRecords } from "../actions/ScrapeTrackersSeedInfo";
 import type { ITorrentBackend, TorrentEngineLike, SwarmSummary } from "./ITorrentBackend";
+import {IS_AZURE_ENV} from "../Constants.ts";
 
 declare module "webtorrent" {
     interface TorrentOptions {
@@ -20,6 +21,11 @@ declare module "webtorrent" {
     }
 }
 
+const DOWNLOADS_PATH = IS_AZURE_ENV
+    ? "/mnt/kunkka-db-files/webtorrent-downloads"
+    // language=file-reference
+    : __dirname + "/" + "../../../data/webtorrent-downloads";
+
 export class WebTorrentBackend implements ITorrentBackend {
     private readonly client: WebTorrent.Instance;
     private readonly infoHashToTorrent: Record<string, WebTorrent.Torrent> = {};
@@ -36,6 +42,7 @@ export class WebTorrentBackend implements ITorrentBackend {
             this.infoHashToWhenReady[infoHash] = new Promise<TorrentEngineLike>(resolve => {
                 this.client.add(magnetLink, {
                     announce: trackers.length !== 0 ? trackers : trackerRecords.map(t => t.url),
+                    path: "/mnt/kunkka-db-files/webtorrent-downloads",
                     deselect: true,
                 }, torrent => {
                     this.infoHashToTorrent[infoHash] = torrent;
@@ -60,13 +67,22 @@ export class WebTorrentBackend implements ITorrentBackend {
     }
 
     startMeta(infoHash: string): { whenMeta: Promise<TorrentInfo>, cancel(): void } {
-        const tempClient = new WebTorrent();
-        const whenMeta = new Promise<TorrentInfo>(resolve => {
-            tempClient.add("magnet:?xt=urn:btih:" + infoHash, { deselect: true }, torrent => {
-                resolve(shortenTorrentInfo({ name: torrent.name, length: torrent.length, files: torrent.files }));
+        const whenMeta = new Promise<Torrent>(resolve => {
+            this.client.add("magnet:?xt=urn:btih:" + infoHash, { deselect: true }, torrent => {
+                resolve(torrent);
+                if (!this.infoHashToWhenReady[infoHash]) {
+                    this.client.remove(torrent, { destroyStore: true })
+                        .catch((error) => console.warn("Failed to remove meta info torrent", torrent, error));
+                }
             });
         });
-        return { whenMeta, cancel: () => tempClient.destroy() };
+        return {
+            whenMeta,
+            cancel: () => whenMeta.then(torrent => {
+                if (!this.infoHashToWhenReady[infoHash]) {
+                    return this.client.remove(torrent, { destroyStore: true });
+                }
+            }),
+        };
     }
-
 }

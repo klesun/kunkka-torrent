@@ -1,7 +1,7 @@
 import type * as http from "http";
 import { BadGateway } from "@curveball/http-errors";
 import { readPost } from "./utils/Http";
-const fetch = require("node-fetch");
+import {fail} from "node:assert";
 
 /**
  * a mapping to the Web API of qbittorrent
@@ -16,11 +16,15 @@ const Qbtv2 = ({ port = 44011 } = {}) => {
             /** @see https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#start-search */
             start: async (rq: http.IncomingMessage, rs: http.ServerResponse) => {
                 const url = "http://localhost:" + port + "/api/v2/search/start";
-                const params = {
+
+                const params: RequestInit = {
                     // needed for cookie, too lazy to parse it on node's side
-                    headers: rq.headers,
+                    headers: {
+                        "content-type": rq.headers["content-type"] ?? fail(),
+                    },
                     method: "POST",
                     body: await readPost(rq),
+                    credentials: "include",
                 };
                 const fetchRs = await fetch(url, params);
                 // extracting cookie on server side would be much better, but I failed
@@ -41,9 +45,13 @@ const Qbtv2 = ({ port = 44011 } = {}) => {
                 const url = "http://localhost:" + port + "/api/v2/search/results";
                 const fetchRs = await fetch(url, {
                     // needed for cookie, too lazy to parse it on node's side
-                    headers: rq.headers,
+                    headers: {
+                        "content-type": rq.headers["content-type"] ?? fail(),
+                        cookie: rq.headers.cookie ?? fail(),
+                    },
                     method: "POST",
                     body: rqBody,
+                    credentials: "include",
                 });
                 const body = await fetchRs.text();
                 try {

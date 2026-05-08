@@ -3,9 +3,10 @@ import * as fsSync from 'fs';
 import * as readline from 'readline';
 import {InfohashDbRow} from "../src/server/typing/InfohashDbRow";
 import Infohashes from "../src/server/repositories/Infohashes";
+import {Infohash} from "../src/common/types.ts";
 
 type RecordBase = {
-    infohash: string,
+    infohash: Infohash,
     name: string,
 };
 
@@ -65,13 +66,13 @@ const main = async () => {
         }
         let record: DhtRecord | DhtRecord[];
         try {
-            record = JSON.parse(line);
+            record = JSON.parse(line) as DhtRecord | DhtRecord[];
         } catch {
             continue;
         }
         const records: DhtRecord[] = Array.isArray(record) ? record : [record];
         for (const record of records) {
-		  if (!record.length && !record.files) {
+		  if (!("length" in record) && !("files" in record)) {
 			console.log('Parasha at ' + i + ' - ' + line);
 			continue;
 		  }

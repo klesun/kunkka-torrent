@@ -5,6 +5,7 @@ import { JSDOM } from "jsdom";
 import { Stats } from "fs";
 import Infohashes from "../src/server/repositories/Infohashes";
 import {InfohashDbRow} from "../src/server/typing/InfohashDbRow";
+import {Infohash} from "../src/common/types.ts";
 
 const ROOT_FOLDER_PATH = __dirname + "/../data/nyaa_si_scrapes";
 
@@ -56,7 +57,7 @@ function parseRows(rows: Element[]) {
 
 function parseNyaaSiPage(document: Document) {
     const anchors = [...document.querySelectorAll("a[href]")];
-    let infoHash: string | null = null;
+    let infoHash: Infohash | null = null;
     for (const anchor of anchors) {
         const href = anchor.getAttribute("href") ?? neverNull("href");
         const match = href.match(/^magnet:\?(.+)$/);
@@ -64,7 +65,7 @@ function parseNyaaSiPage(document: Document) {
             const searchParams = new URLSearchParams(match[1]);
             const xt = searchParams.get("xt") ?? neverNull("xt");
             const xtMatch = xt.match(/^urn:btih:([0-9a-f]{40})$/) ?? neverNull("urn:btih:");
-            infoHash = xtMatch[1];
+            infoHash = Infohash(xtMatch[1]);
             break;
         }
     }

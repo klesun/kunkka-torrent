@@ -5,6 +5,7 @@ import {InfohashDbRow, NoFilesInfoSource} from "../src/server/typing/InfohashDbR
 import DbPool from "../src/server/utils/DbPool";
 import * as SqlUtil from 'klesun-node-tools/src/Utils/SqlUtil.js';
 import {IS_AZURE_ENV} from "../src/server/Constants.ts";
+import {Infohash} from "../src/common/types.ts";
 
 /** @see https://stackoverflow.com/a/39460727/2750743 */
 function base64ToHex(str: string) {
@@ -31,9 +32,10 @@ const addFromCsv = async (csvPath: string, source: NoFilesInfoSource) => {
             name: name,
             updatedDt: addedDt,
             occurrences: 1,
-            infohash: base64ToHex(infohashBase64),
+            infohash: Infohash(base64ToHex(infohashBase64)),
             length: +size,
             source: source,
+            filesCount: null,
         };
     });
     const rowsPerBatch = Math.floor(

@@ -11,7 +11,7 @@ export function Infohash(value: string) {
     if (value.match(/^[a-fA-F0-9]{40}$/) || // hex
         value.match(/^[a-zA-Z2-7]{32}$/) // base32
     ) {
-        return brand(value);
+        return brand<Infohash>(value);
     } else {
         const message = "Invalid infohash format: " + value +
             " - expected a 40 characters long hex string or 32 characters long base32 string, but got " +

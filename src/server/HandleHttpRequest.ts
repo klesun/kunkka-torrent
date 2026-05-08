@@ -438,7 +438,7 @@ const serveListDirectory = async (params: HandleHttpParams) => {
 
 const scrapeTrackersSeedInfo = async (params: HandleHttpParams) => {
     const postStr = await readPost(params.rq);
-    const { torrents }: { torrents: { infohash: string }[] } = JSON.parse(postStr);
+    const { torrents } = JSON.parse(postStr) as { torrents: { infohash: string }[] };
     /** should probably cache retrieved seeds data eventually */
     const itemsIter = ScrapeTrackersSeedInfo(torrents.map(t => t.infohash));
     return serveStreamedApiResponse(params.rs, itemsIter);

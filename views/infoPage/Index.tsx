@@ -82,7 +82,9 @@ const typeToStreamInfoMaker: {
     },
 };
 
-function StreamItem({ stream }: { stream: FfprobeStream & { codec_type: Exclude<FfprobeStream["codec_type"], "audio"> } }) {
+type NonAudioStream = FfprobeStream & { codec_type: Exclude<FfprobeStream["codec_type"], "audio"> };
+
+function StreamItem({ stream }: { stream: NonAudioStream }) {
     const { codec_name, codec_long_name, profile, codec_type, ...rest } = stream;
     const typedInfoMaker = typeToStreamInfoMaker[codec_type] || null;
     const typeInfo = typedInfoMaker ? typedInfoMaker(rest) : JSON.stringify(rest).slice(0, 70);

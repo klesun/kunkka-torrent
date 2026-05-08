@@ -173,7 +173,9 @@ const Infohashes = () => {
                 //     return selectMany(db, selectSql, [lastId, CHUNK_SIZE]);
                 // });
                 const chunk = await dbPool.withDb(async (db) => {
-                    return db.all(selectSql, [lastId, CHUNK_SIZE]);
+                    return db.all<(InfohashDbRow & { rowid: number })[]>(
+                        selectSql, [lastId, CHUNK_SIZE]
+                    );
                 });
                 if (chunk.length > 0) {
                     yield chunk.map(deserialize);

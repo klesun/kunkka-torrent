@@ -26,7 +26,7 @@ const DbPool = ({ filename, maxConnections = 1 }: {
     ): Promise<T> => {
         let dbConn: Database;
         if (connectionsPool.size > 0) {
-            dbConn = connectionsPool.values().next().value;
+            [dbConn] = connectionsPool.values();
             connectionsPool.delete(dbConn);
         } else {
             dbConn = await openNewDbConnection();

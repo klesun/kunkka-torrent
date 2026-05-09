@@ -14,6 +14,7 @@ import { BadRequest,Forbidden, NotFound } from "@curveball/http-errors";
 import { readPost } from "./utils/Http";
 import ScrapeTrackersSeedInfo, { trackerRecords } from "./actions/ScrapeTrackersSeedInfo";
 import { IS_P2P_FORBIDDEN } from "./torrent-backends/ITorrentBackend.ts";
+import type { Infohash } from "../common/types.ts";
 const { spawn } = require("child_process");
 const unzip = require("unzip-stream");
 const srt2vtt = require("srt-to-vtt");
@@ -124,7 +125,7 @@ const serveStaticFile = async (pathname: string, params: HandleHttpParams) => {
     }
 };
 
-function assertValidInfoHash(infoHash: string) {
+function assertValidInfoHash(infoHash: string): asserts infoHash is Infohash {
     if (!infoHash || infoHash.length !== 40 && !infoHash.match(/^[a-zA-Z2-7]{32}$/)) {
         throw new BadRequest("Invalid infoHash, must be a 40 characters long hex string or a 32 characters long base32 string");
     }
@@ -208,6 +209,7 @@ const serveTorrentStreamEnsureVtt = async (params: HandleHttpParams) => {
 const serveTorrentStreamCodeInH264 = async (params: HandleHttpParams) => {
     const { rq, rs, api } = params;
     const { infoHash, filePath } = <Record<string, string>>url.parse(<string>rq.url, true).query;
+    assertValidInfoHash(infoHash);
     await api.prepareTorrentStream(infoHash);
     const streamUrl = "http://localhost:" + HTTP_PORT + "/torrent-stream?infoHash=" +
         infoHash + "&filePath=" + encodeURIComponent(filePath);
@@ -250,6 +252,7 @@ const serveTorrentStreamCodeInH264 = async (params: HandleHttpParams) => {
 const serveTorrentStreamExtractSubs = async (params: HandleHttpParams) => {
     const { rq, rs, api } = params;
     const { infoHash, filePath, subsIndex } = <Record<string, string>>url.parse(<string>rq.url, true).query;
+    assertValidInfoHash(infoHash);
     await api.prepareTorrentStream(infoHash);
     const streamUrl = "http://localhost:" + HTTP_PORT + "/torrent-stream?infoHash=" +
         infoHash + "&filePath=" + encodeURIComponent(filePath);
@@ -273,6 +276,7 @@ const serveTorrentStreamExtractAudio = async (params: HandleHttpParams) => {
     const { rq, rs, api } = params;
     const { infoHash, filePath, streamIndex, codecName } = <Record<string, string>>url.parse(<string>rq.url, true).query;
     rq.connection.setTimeout(3600000);
+    assertValidInfoHash(infoHash);
     await api.prepareTorrentStream(infoHash);
     const streamUrl = "http://localhost:" + HTTP_PORT + "/torrent-stream?infoHash=" +
         infoHash + "&filePath=" + encodeURIComponent(filePath);

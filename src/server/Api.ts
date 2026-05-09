@@ -15,9 +15,10 @@ import Infohashes from "./repositories/Infohashes";
 import * as console from "node:console";
 import { backend } from "./torrent-backends/ActiveBackend";
 import type { TorrentEngineLike } from "./torrent-backends/ITorrentBackend";
+import type { Infohash } from "../common/types.ts";
 
 
-function assertValidInfoHash(infoHash: string | null | undefined | string[]): asserts infoHash is string {
+function assertValidInfoHash(infoHash: string | null | undefined | string[]): asserts infoHash is Infohash {
     if (Array.isArray(infoHash)) {
         throw new BadRequest("Only one infohash is expected in parameters");
     }
@@ -30,7 +31,7 @@ const Api = () => {
     const torrentNamesFts = TorrentNamesFts();
     const infohashes = Infohashes();
 
-    const prepareTorrentStream = async (infoHash: string, trackers: string[] = []): Promise<TorrentEngineLike> => {
+    const prepareTorrentStream = async (infoHash: Infohash, trackers: string[] = []): Promise<TorrentEngineLike> => {
         assertValidInfoHash(infoHash);
         return backend.prepareTorrentStream(infoHash,
             trackers.length !== 0 ? trackers : trackerRecords.map(t => t.url));
@@ -64,7 +65,7 @@ const Api = () => {
         tr = !tr ? [] : typeof tr === "string" ? [tr] : tr;
 
         assertValidInfoHash(infoHash);
-        const engine = await prepareTorrentStream(<string>infoHash, tr);
+        const engine = await prepareTorrentStream(infoHash, tr);
         return {
             torrent: {
                 name: engine.torrent.name,

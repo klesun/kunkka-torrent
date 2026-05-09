@@ -5,8 +5,9 @@ import type { IApi_connectToSwarm_rs, IApi_getSwarmInfo_rs } from "../../src/ser
 import type { ShortTorrentFileInfo } from "../../src/server/torrent-backends/ITorrentBackend";
 import type { FfprobeOutput, FfprobeAudioStream, FfprobeStream } from "../../src/client/FfprobeOutput.ts";
 import type { FileHeader } from "node-unrar-js/src/js/extractor.ts";
+import { BACKEND_BASE_URL } from "../../src/client/ApiUntyped";
 
-const { React, ReactDOM } = window;
+const { React } = window;
 const { useEffect, useState, useRef } = React;
 
 const Dom = React.createElement;
@@ -230,7 +231,7 @@ function SyncedAudioTrack(props: AudioTrackParams & {
         ref={audioRef}
         controls={true}
         preload="auto"
-        src={"/torrent-stream-extract-audio?" + new URLSearchParams({
+        src={BACKEND_BASE_URL + "/torrent-stream-extract-audio?" + new URLSearchParams({
             ...props.fileApiParams,
             streamIndex: String(props.selectedAudioTrack.index),
             codecName: props.selectedAudioTrack.codec_name,
@@ -347,7 +348,7 @@ function FileEntryFromZip({ fileApiParams, entry }: { fileApiParams: FileApiPara
         openedFile = <></>;
     } else {
         const extension = entry.path.toLowerCase().replace(/^.*\./, "");
-        const src = "/ftp/zipReaderFile?" + new URLSearchParams({
+        const src = BACKEND_BASE_URL + "/ftp/zipReaderFile?" + new URLSearchParams({
             ...fileApiParams, zippedFilePath: entry.path,
         });
         openedFile = makeFileView({ src, extension });
@@ -431,7 +432,7 @@ function ExtractedZipFileView(fileApiParams: FileApiParams) {
         }).finally(() => setLoading(false));
     }, []);
 
-    const downloadSrc = "/torrent-stream?" + new URLSearchParams(fileApiParams);
+    const downloadSrc = BACKEND_BASE_URL + "/torrent-stream?" + new URLSearchParams(fileApiParams);
     return <div>
         <div>{entries.map(entry => <div key={entry.path} style={{ textAlign: "right" }}>
             <FileEntryFromZip fileApiParams={fileApiParams} entry={entry}/>
@@ -489,7 +490,7 @@ function getSubTracks(params: PlayerParams, ffprobeOutput: FfprobeOutput | undef
     });
     return <>
         {matchedTracks.map((subsTrack, subsIndex) => {
-            const subsSrc = "/torrent-stream-subs-ensure-vtt?" + new URLSearchParams({
+            const subsSrc = BACKEND_BASE_URL + "/torrent-stream-subs-ensure-vtt?" + new URLSearchParams({
                 infoHash: infoHash,
                 filePath: subsTrack.path,
             });
@@ -504,7 +505,7 @@ function getSubTracks(params: PlayerParams, ffprobeOutput: FfprobeOutput | undef
         {ffprobeOutput && ffprobeOutput.streams
             .flatMap(s => s.codec_type === "subtitle" ? [s] : [])
             .map((sub, subsIndex) => {
-                const src = "/torrent-stream-extract-subs?" + new URLSearchParams({
+                const src = BACKEND_BASE_URL + "/torrent-stream-extract-subs?" + new URLSearchParams({
                     ...fileApiParams, subsIndex: String(subsIndex),
                 });
                 const { tags } = sub;
@@ -578,7 +579,7 @@ type PlayerParams = {
 function Player(props: PlayerParams) {
     const { infoHash, file, files } = props;
 
-    const streamPath = "/torrent-stream";
+    const streamPath = BACKEND_BASE_URL + "/torrent-stream";
     const fileApiParams = {
         infoHash: infoHash,
         filePath: file.path,

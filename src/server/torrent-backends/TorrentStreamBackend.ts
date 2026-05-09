@@ -1,6 +1,7 @@
-import type { TorrentMainInfo } from "./ITorrentBackend";
+import  { IS_P2P_FORBIDDEN } from "./ITorrentBackend";
 import { trackerRecords } from "../actions/ScrapeTrackersSeedInfo";
-import type { ITorrentBackend, ITorrentFile, TorrentEngineLike, SwarmSummary } from "./ITorrentBackend";
+import type { ITorrentBackend, ITorrentFile, TorrentEngineLike, SwarmSummary , TorrentMainInfo } from "./ITorrentBackend";
+import { Forbidden } from "@curveball/http-errors";
 
 const torrentStream = require("torrent-stream");
 
@@ -68,6 +69,9 @@ export class TorrentStreamBackend implements ITorrentBackend {
     private readonly infoHashToWhenReadyEngine: Record<string, Promise<NowadaysEngine>> = {};
 
     prepareTorrentStream(infoHash: string, trackers: string[]): Promise<TorrentEngineLike> {
+        if (IS_P2P_FORBIDDEN) {
+            throw new Forbidden("P2P operations are not allowed on this environment");
+        }
         if (!this.infoHashToWhenReadyEngine[infoHash]) {
             const magnetLink = "magnet:?xt=urn:btih:" + infoHash +
                 trackers.map(tr => "&tr=" + encodeURIComponent(tr)).join("");

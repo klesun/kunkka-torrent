@@ -10,9 +10,10 @@ import type { Writable } from "stream";
 import type * as EventEmitter from "events";
 import type { ReadStream } from "fs";
 import ServeInfoPage from "./actions/ServeInfoPage";
-import { BadRequest, NotFound } from "@curveball/http-errors";
+import { BadRequest,Forbidden, NotFound } from "@curveball/http-errors";
 import { readPost } from "./utils/Http";
 import ScrapeTrackersSeedInfo, { trackerRecords } from "./actions/ScrapeTrackersSeedInfo";
+import { IS_P2P_FORBIDDEN } from "./torrent-backends/ITorrentBackend.ts";
 const { spawn } = require("child_process");
 const unzip = require("unzip-stream");
 const srt2vtt = require("srt-to-vtt");
@@ -440,6 +441,9 @@ const serveListDirectory = async (params: HandleHttpParams) => {
 };
 
 const scrapeTrackersSeedInfo = async (params: HandleHttpParams) => {
+    if (IS_P2P_FORBIDDEN) {
+        throw new Forbidden("P2P operations are not allowed on this environment");
+    }
     const postStr = await readPost(params.rq);
     const { torrents } = JSON.parse(postStr) as { torrents: { infohash: string }[] };
     /** should probably cache retrieved seeds data eventually */

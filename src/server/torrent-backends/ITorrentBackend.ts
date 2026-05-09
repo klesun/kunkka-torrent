@@ -1,3 +1,4 @@
+import * as os from "node:os";
 export type SwarmSummary = {
     downloaded: number,
     downloadSpeed: number,
@@ -37,10 +38,12 @@ export const shortenTorrentInfo = (torrent: TorrentMainInfo) => ({
     files: torrent.files.map(shortenFileInfo),
 });
 
-export type TorrentInfo = ReturnType<typeof shortenTorrentInfo>;
-
 export interface ITorrentBackend {
     /** add to the persistent streaming client, resolve when metadata + files are ready */
     prepareTorrentStream(infoHash: string, trackers: string[]): Promise<TorrentEngineLike>,
     swarmSummary(infoHash: string): SwarmSummary,
 }
+
+const computerName = os.hostname();
+
+export const IS_P2P_FORBIDDEN = computerName === "Arturs-MacBook-Pro.local";

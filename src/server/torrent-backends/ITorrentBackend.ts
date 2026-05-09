@@ -1,8 +1,11 @@
 import * as os from "node:os";
+
 export type SwarmSummary = {
     downloaded: number,
     downloadSpeed: number,
     peers: number,
+    ready: boolean,
+    paused: boolean,
 };
 
 export interface ITorrentFile {
@@ -22,27 +25,9 @@ export type ShortTorrentFileInfo = {
     length: number,
 };
 
-export type TorrentMainInfo = {
-    name: string,
-    length: number,
-    files: readonly { path: string, length: number }[],
-};
-
 export const shortenFileInfo = (f: { path: string, length: number }): ShortTorrentFileInfo => ({
     path: f.path, length: f.length,
 });
-
-export const shortenTorrentInfo = (torrent: TorrentMainInfo) => ({
-    name: torrent.name,
-    length: torrent.length,
-    files: torrent.files.map(shortenFileInfo),
-});
-
-export interface ITorrentBackend {
-    /** add to the persistent streaming client, resolve when metadata + files are ready */
-    prepareTorrentStream(infoHash: string, trackers: string[]): Promise<TorrentEngineLike>,
-    swarmSummary(infoHash: string): SwarmSummary,
-}
 
 const computerName = os.hostname();
 

@@ -12,9 +12,10 @@ import type { ReadStream } from "fs";
 import ServeInfoPage from "./actions/ServeInfoPage";
 import { BadRequest,Forbidden, NotFound } from "@curveball/http-errors";
 import { readPost } from "./utils/Http";
-import ScrapeTrackersSeedInfo, { trackerRecords } from "./actions/ScrapeTrackersSeedInfo";
+import ScrapeTrackersSeedInfo from "./actions/ScrapeTrackersSeedInfo";
 import { IS_P2P_FORBIDDEN } from "./torrent-backends/ITorrentBackend.ts";
 import type { Infohash } from "../common/types.ts";
+import { backend } from "./torrent-backends/ActiveBackend.ts";
 const { spawn } = require("child_process");
 const unzip = require("unzip-stream");
 const srt2vtt = require("srt-to-vtt");
@@ -140,7 +141,7 @@ const getFileInTorrent = async (params: HandleHttpParams) => {
         throw new BadRequest("filePath parameter is mandatory");
     }
 
-    const engine = await api.prepareTorrentStream(infoHash, trackerRecords.map(t => t.url));
+    const engine = await backend.prepareTorrentStream(infoHash);
     const file = engine.files.find(f => f.path === filePath);
     if (!file) {
         throw new BadRequest("filePath not found in this torrent, possible options: " + engine.files.map(f => f.path));
@@ -207,10 +208,10 @@ const serveTorrentStreamEnsureVtt = async (params: HandleHttpParams) => {
 };
 
 const serveTorrentStreamCodeInH264 = async (params: HandleHttpParams) => {
-    const { rq, rs, api } = params;
+    const { rq, rs } = params;
     const { infoHash, filePath } = <Record<string, string>>url.parse(<string>rq.url, true).query;
     assertValidInfoHash(infoHash);
-    await api.prepareTorrentStream(infoHash);
+    await backend.prepareTorrentStream(infoHash);
     const streamUrl = "http://localhost:" + HTTP_PORT + "/torrent-stream?infoHash=" +
         infoHash + "&filePath=" + encodeURIComponent(filePath);
     const args = [
@@ -250,10 +251,10 @@ const serveTorrentStreamCodeInH264 = async (params: HandleHttpParams) => {
 };
 
 const serveTorrentStreamExtractSubs = async (params: HandleHttpParams) => {
-    const { rq, rs, api } = params;
+    const { rq, rs } = params;
     const { infoHash, filePath, subsIndex } = <Record<string, string>>url.parse(<string>rq.url, true).query;
     assertValidInfoHash(infoHash);
-    await api.prepareTorrentStream(infoHash);
+    await backend.prepareTorrentStream(infoHash);
     const streamUrl = "http://localhost:" + HTTP_PORT + "/torrent-stream?infoHash=" +
         infoHash + "&filePath=" + encodeURIComponent(filePath);
     const args = [
@@ -273,11 +274,11 @@ const serveTorrentStreamExtractSubs = async (params: HandleHttpParams) => {
 };
 
 const serveTorrentStreamExtractAudio = async (params: HandleHttpParams) => {
-    const { rq, rs, api } = params;
+    const { rq, rs } = params;
     const { infoHash, filePath, streamIndex, codecName } = <Record<string, string>>url.parse(<string>rq.url, true).query;
     rq.connection.setTimeout(3600000);
     assertValidInfoHash(infoHash);
-    await api.prepareTorrentStream(infoHash);
+    await backend.prepareTorrentStream(infoHash);
     const streamUrl = "http://localhost:" + HTTP_PORT + "/torrent-stream?infoHash=" +
         infoHash + "&filePath=" + encodeURIComponent(filePath);
     const args = [

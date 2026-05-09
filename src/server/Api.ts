@@ -10,11 +10,9 @@ import * as fs from "fs";
 import parseTorrent from "parse-torrent";
 import { BadGateway, BadRequest, NotFound, NotImplemented, ServiceUnavailable } from "@curveball/http-errors";
 import TorrentNamesFts from "./repositories/TorrentNamesFts";
-import { trackerRecords } from "./actions/ScrapeTrackersSeedInfo";
 import Infohashes from "./repositories/Infohashes";
 import * as console from "node:console";
 import { backend } from "./torrent-backends/ActiveBackend";
-import type { TorrentEngineLike } from "./torrent-backends/ITorrentBackend";
 import type { Infohash } from "../common/types.ts";
 
 
@@ -30,12 +28,6 @@ function assertValidInfoHash(infoHash: string | null | undefined | string[]): as
 const Api = () => {
     const torrentNamesFts = TorrentNamesFts();
     const infohashes = Infohashes();
-
-    const prepareTorrentStream = async (infoHash: Infohash, trackers: string[] = []): Promise<TorrentEngineLike> => {
-        assertValidInfoHash(infoHash);
-        return backend.prepareTorrentStream(infoHash,
-            trackers.length !== 0 ? trackers : trackerRecords.map(t => t.url));
-    };
 
     const getFfmpegInfo = async (rq: http.IncomingMessage) => {
         const { infoHash, filePath } = <Record<string, string>>url.parse(<string>rq.url, true).query;
@@ -61,11 +53,10 @@ const Api = () => {
     const connectToSwarm = async (rq: http.IncomingMessage) => {
         const query = url.parse(<string>rq.url, true).query;
 
-        let { infoHash, tr = [] } = query;
-        tr = !tr ? [] : typeof tr === "string" ? [tr] : tr;
+        const { infoHash } = query;
 
         assertValidInfoHash(infoHash);
-        const engine = await prepareTorrentStream(infoHash, tr);
+        const engine = await prepareTorrentStream(infoHash);
         return {
             torrent: {
                 name: engine.torrent.name,

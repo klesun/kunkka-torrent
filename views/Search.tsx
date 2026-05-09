@@ -91,7 +91,7 @@ function ParallelCap(maxParallelActions: number) {
     };
 }
 
-const torrentFileDownloadParallelCap = ParallelCap(5);
+const torrentFileDownloadParallelCap = ParallelCap(3);
 
 function downloadTorrentFile(fileUrl: string) {
     return torrentFileDownloadParallelCap.enqueue(() => api.downloadTorrentFile({ fileUrl }));

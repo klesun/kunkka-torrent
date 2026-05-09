@@ -5,7 +5,7 @@ import type { IApi_connectToSwarm_rs, IApi_getSwarmInfo_rs } from "../../src/ser
 import type { ShortTorrentFileInfo } from "../../src/server/torrent-backends/ITorrentBackend";
 import type { FfprobeOutput, FfprobeAudioStream, FfprobeStream } from "../../src/client/FfprobeOutput.ts";
 import type { FileHeader } from "node-unrar-js/src/js/extractor.ts";
-import { BACKEND_BASE_URL } from "../../src/client/ApiUntyped";
+import { BACKEND_BASE_URL } from "../../src/client/ApiUntyped.js";
 
 const { React } = window;
 const { useEffect, useState, useRef } = React;
@@ -54,11 +54,7 @@ function FilesList({ seconds, isBadCodec, files, playCallback }: {
     </div>;
 }
 
-const typeToStreamInfoMaker: {
-    [type in Exclude<FfprobeStream["codec_type"], "audio">]: (
-        stream: FfprobeStream & { codec_type: type }
-    ) => React.ReactElement
-} = {
+const typeToStreamInfoMaker = {
     "video": (stream) => {
         const { width, height, display_aspect_ratio, avg_frame_rate, bits_per_raw_sample, pix_fmt, ...rest } = stream;
         return <span>
@@ -80,6 +76,10 @@ const typeToStreamInfoMaker: {
         const { filename } = tags;
         return <span>{filename || JSON.stringify(tags)}</span>;
     },
+} satisfies {
+    [type in Exclude<FfprobeStream["codec_type"], "audio">]: (
+        stream: FfprobeStream & { codec_type: type }
+    ) => React.ReactElement
 };
 
 type NonAudioStream = FfprobeStream & { codec_type: Exclude<FfprobeStream["codec_type"], "audio"> };
@@ -655,7 +655,7 @@ export default function Index({ infoHash }: { infoHash: string }) {
     };
 
     useEffect(() => {
-        Api().connectToSwarm({ infoHash, tr: [] }).then(setMetaInfo);
+        Api().connectToSwarm({ infoHash }).then(setMetaInfo);
         const intervalStartMs = Date.now();
         pollForSwarmInfo(intervalStartMs);
     }, []);

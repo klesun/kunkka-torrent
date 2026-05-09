@@ -88,7 +88,7 @@ const Api = () => {
         /**
          * tr is list of tracker web addresses
          */
-        connectToSwarm: (params: { infoHash: string, tr: string[] }) => get<IApi_connectToSwarm_rs>("/api/connectToSwarm", params),
+        connectToSwarm: (params: { infoHash: string }) => get<IApi_connectToSwarm_rs>("/api/connectToSwarm", params),
         getSwarmInfo: (params: { infoHash: string }) => get<IApi_getSwarmInfo_rs>("/api/getSwarmInfo", params),
         /**
          * retrieves torrent file by link from a private resource that requires my credentials

@@ -1,7 +1,9 @@
 import WebTorrent from "webtorrent";
 import { trackerRecords } from "../actions/ScrapeTrackersSeedInfo";
-import type { ITorrentBackend, TorrentEngineLike, SwarmSummary } from "./ITorrentBackend";
+import type { TorrentEngineLike, SwarmSummary } from "./ITorrentBackend";
+import  { IS_P2P_FORBIDDEN } from "./ITorrentBackend";
 import { IS_AZURE_ENV } from "../Constants.ts";
+import { Forbidden } from "@curveball/http-errors";
 
 declare module "webtorrent" {
     interface TorrentOptions {
@@ -24,7 +26,7 @@ const DOWNLOADS_PATH = IS_AZURE_ENV
     // language=file-reference
     : __dirname + "/" + "../../../data/webtorrent-downloads";
 
-export class WebTorrentBackend implements ITorrentBackend {
+export class WebTorrentBackend {
     private readonly client: WebTorrent.Instance;
     private readonly infoHashToTorrent: Record<string, WebTorrent.Torrent> = {};
     private readonly infoHashToWhenReady: Record<string, Promise<TorrentEngineLike>> = {};
@@ -33,17 +35,20 @@ export class WebTorrentBackend implements ITorrentBackend {
         this.client = new WebTorrent();
     }
 
-    prepareTorrentStream(infoHash: string, trackers: string[]): Promise<TorrentEngineLike> {
+    prepareTorrentStream(infoHash: string): Promise<TorrentEngineLike> {
+        if (IS_P2P_FORBIDDEN) {
+            throw new Forbidden("P2P operations are not allowed on this environment");
+        }
+        const trackers = trackerRecords.map(t => t.url);
         if (!this.infoHashToWhenReady[infoHash]) {
             const magnetLink = "magnet:?xt=urn:btih:" + infoHash +
                 trackers.map(tr => "&tr=" + encodeURIComponent(tr)).join("");
             this.infoHashToWhenReady[infoHash] = new Promise<TorrentEngineLike>(resolve => {
-                this.client.add(magnetLink, {
+                this.infoHashToTorrent[infoHash] = this.client.add(magnetLink, {
                     announce: trackers.length !== 0 ? trackers : trackerRecords.map(t => t.url),
                     path: DOWNLOADS_PATH,
                     deselect: true,
                 }, torrent => {
-                    this.infoHashToTorrent[infoHash] = torrent;
                     resolve({
                         torrent: { name: torrent.name },
                         files: torrent.files,
@@ -55,12 +60,14 @@ export class WebTorrentBackend implements ITorrentBackend {
     }
 
     swarmSummary(infoHash: string): SwarmSummary {
+        this.prepareTorrentStream(infoHash).catch(() => {});
         const torrent = this.infoHashToTorrent[infoHash];
-        if (!torrent) { throw new Error("torrent not found for infoHash"); }
         return {
             downloaded: torrent.downloaded,
             downloadSpeed: torrent.downloadSpeed,
             peers: torrent.numPeers,
+            ready: torrent.ready,
+            paused: torrent.paused,
         };
     }
 }

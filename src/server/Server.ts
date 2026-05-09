@@ -40,14 +40,9 @@ const Server = async (rootPath: string) => {
         };
         https.createServer(tlsOptions, (rq, rs) => handleRq({ rq, rs, rootPath, api }))
             .listen(443, "0.0.0.0", () => console.log("listening on https://kunkka.klesun.net " + process.env.WEBSITE_SITE_NAME));
-        http.createServer((rq, rs) => {
-            rs.writeHead(301, { "Location": "https://" + rq.headers.host + rq.url });
-            rs.end();
-        }).listen(80, "0.0.0.0", () => console.log("http→https redirect on port 80"));
-    } else {
-        http.createServer((rq, rs) => handleRq({ rq, rs, rootPath, api }))
-            .listen(HTTP_PORT, "0.0.0.0", () => console.log("listening on http://localhost:" + HTTP_PORT + " " + process.env.WEBSITE_SITE_NAME));
     }
+    http.createServer((rq, rs) => handleRq({ rq, rs, rootPath, api }))
+        .listen(HTTP_PORT, "0.0.0.0", () => console.log("listening on http://localhost:" + HTTP_PORT + " " + process.env.WEBSITE_SITE_NAME));
 };
 
 export default Server;

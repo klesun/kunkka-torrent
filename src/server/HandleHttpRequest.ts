@@ -377,6 +377,7 @@ const serveStreamedApiResponse = async <TItem>(
         res.write("]");
     } else {
         res.statusCode = 424;
+        res.statusMessage = "No results received";
     }
     res.end();
 };

@@ -7,7 +7,7 @@ import { parseMagnetUrl } from "../common/Utils.js";
 const util = require("util");
 const execFile = util.promisify(require("child_process").execFile);
 import * as fs from "fs";
-import * as parseTorrent from "parse-torrent";
+import parseTorrent from "parse-torrent";
 import { BadGateway, BadRequest, NotFound, NotImplemented, ServiceUnavailable } from "@curveball/http-errors";
 import TorrentNamesFts from "./repositories/TorrentNamesFts";
 import { trackerRecords } from "./actions/ScrapeTrackersSeedInfo";

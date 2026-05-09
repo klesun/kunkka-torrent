@@ -4,8 +4,7 @@
  * @typedef {import("@mhc/utils/types/utility").JsonValue} JsonValue
  */
 
-export const BACKEND_BASE_URL = "";
-// export const BACKEND_BASE_URL = "https://torrent.klesun.net";
+export const BACKEND_BASE_URL = window.location.hostname === "localhost" ? "https://kunkka.klesun.net" : "";
 
 export class HttpStatusError extends Error {
     constructor(response) {
@@ -70,7 +69,7 @@ export const get = (route, params = null) => {
  * @template {JsonValue} T
  * @param {Pathname} route
  * @param {GetParams} params
- * @return {T}
+ * @return {Promise<T>}
  */
 export const postWwwForm = (route, params) => {
     return fetch(BACKEND_BASE_URL + route, {

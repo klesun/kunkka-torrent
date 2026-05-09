@@ -37,8 +37,8 @@ const main = async () => {
     const appComponentPath = "./Search.tsx";
     await loadModule(appComponentPath, { jsx: "react" }).then(async ({ default: Search }) => {
         const localResults = await whenLocalResults;
-        const { id } = await started;
-        const appProps = { qbtv2SearchId: id, localResults };
+        const qbtv2Search = await started;
+        const appProps = { qbtv2Search, localResults };
         if (document.readyState === "complete") {
             initReact(Search, appProps);
         } else {

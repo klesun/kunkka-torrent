@@ -358,7 +358,10 @@ function shouldScrape(record: QbtSearchResultItemExtended): boolean {
 }
 
 export default function Search(props: {
-    qbtv2SearchId: number,
+    qbtv2Search: {
+        id: number,
+        cookie: string,
+    },
     localResults: api_findTorrentsInLocalDb_DbRow[],
 }) {
     const [qbtvStatus, setQbtvStatus] = useState("Loading...");
@@ -373,7 +376,10 @@ export default function Search(props: {
         let offset = 0;
         for (let i = 0; i < 120; ++i) {
             const resultsRs: QbtSearchResult = await api.qbtv2.search.results({
-                id: props.qbtv2SearchId, limit: 500, offset: offset,
+                id: props.qbtv2Search.id,
+                cookie: props.qbtv2Search.cookie,
+                limit: 500,
+                offset: offset,
             });
             setQbtvStatus(resultsRs.status + " (" + offset +  " results found)");
 

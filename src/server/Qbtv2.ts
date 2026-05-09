@@ -2,6 +2,7 @@ import type * as http from "http";
 import { BadGateway } from "@curveball/http-errors";
 import { readPost } from "./utils/Http";
 import { fail } from "node:assert";
+import type { JsonObject } from "@mhc/utils/types/utility.ts";
 
 type ErrorLike = Error | { message?: unknown, cause?: ErrorLike };
 
@@ -83,36 +84,32 @@ const Qbtv2 = ({ port = 44011 } = {}) => {
                     body: await readPost(rq),
                     credentials: "include",
                 };
-                let fetchRs;
+                let fetchRs: Response;
                 try {
                     fetchRs = await fetch(url, params);
                 } catch (error) {
                     throw new BadGateway("Transport error while connecting to qbt: " + stringifyError(error));
                 }
-                // extracting cookie on server side would be much better, but I failed
-                // to make it work from get-go, would need to spend some time...
-                fetchRs.headers.forEach((value: string, name: string) => {
-                    rs.setHeader(name, value);
-                });
                 const body = await fetchRs.text();
+                let bodyParsed: JsonObject;
                 try {
-                    return JSON.parse(body);
+                    bodyParsed = JSON.parse(body) as JsonObject;
                 } catch (exc) {
                     throw new BadGateway("Failed to parse qbt json response - " + body);
                 }
+                return { ...bodyParsed, cookie: fetchRs.headers.get("set-cookie") };
             },
             /** @see https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-search-results */
             results: async (rq: http.IncomingMessage, rs: http.ServerResponse) => {
                 const rqBody = await readPost(rq);
+                const bodyData = new URLSearchParams(rqBody);
                 const url = "http://127.0.0.1:" + port + "/api/v2/search/results";
                 const fetchRs = await fetch(url, {
-                    // needed for cookie, too lazy to parse it on node's side
                     headers: {
-                        "content-type": rq.headers["content-type"] ?? fail(),
-                        cookie: rq.headers.cookie ?? fail(),
+                        cookie: (bodyData.get("cookie") || rq.headers.cookie) ?? fail(),
                     },
                     method: "POST",
-                    body: rqBody,
+                    body: bodyData,
                     credentials: "include",
                 });
                 const body = await fetchRs.text();

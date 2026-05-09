@@ -113,6 +113,7 @@ const Api = () => {
                     id: number,
                     limit: number,
                     offset: number,
+                    cookie: string,
                 }) => postWwwForm<QbtSearchResult>("/api/qbtv2/search/results", params),
             },
         },

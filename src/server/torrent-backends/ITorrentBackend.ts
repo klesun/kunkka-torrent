@@ -1,4 +1,5 @@
 import * as os from "node:os";
+import type { Wire } from "bittorrent-protocol";
 
 export type SwarmSummary = {
     downloaded: number,
@@ -6,6 +7,7 @@ export type SwarmSummary = {
     peers: number,
     ready: boolean,
     paused: boolean,
+    wires: Record<string, Wire>,
 };
 
 export interface ITorrentFile {

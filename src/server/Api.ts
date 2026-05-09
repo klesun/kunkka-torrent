@@ -35,7 +35,7 @@ const Api = () => {
         if (!filePath) {
             throw new BadRequest("filePath parameter is mandatory");
         }
-        await prepareTorrentStream(infoHash);
+        await backend.prepareTorrentStream(infoHash);
         const streamUrl = "http://localhost:" + HTTP_PORT + "/torrent-stream?infoHash=" +
             infoHash + "&filePath=" + encodeURIComponent(filePath);
         const ffprobeArgs = ["-v", "quiet", "-print_format", "json", "-show_format", "-show_streams", streamUrl];
@@ -56,7 +56,7 @@ const Api = () => {
         const { infoHash } = query;
 
         assertValidInfoHash(infoHash);
-        const engine = await prepareTorrentStream(infoHash);
+        const engine = await backend.prepareTorrentStream(infoHash);
         return {
             torrent: {
                 name: engine.torrent.name,
@@ -180,7 +180,7 @@ const Api = () => {
         qbtv2: Qbtv2(),
 
         // following not serializable - for internal use only
-        prepareTorrentStream: prepareTorrentStream,
+        prepareTorrentStream: backend.prepareTorrentStream,
     };
 };
 

@@ -6,6 +6,7 @@ import { InternalServerError } from "@curveball/http-errors";
 import Infohashes from "../repositories/Infohashes";
 import type { InfohashDbRow } from "../typing/InfohashDbRow";
 import { IS_AZURE_ENV } from "../Constants.ts";
+import type { Infohash } from "../../common/types.ts";
 
 const fs = fsSync.promises;
 const Xml = require("klesun-node-tools/src/Utils/Xml.js");
@@ -100,7 +101,11 @@ function normalizeLocalDbRecord(localDbRecord: InfohashDbRow): NormalizedRecord 
     };
 }
 
-const ServeInfoPage = async (params: HandleHttpParams, infoHash: string) => {
+export type SsrDataFromServer = {
+    infoHash: Infohash,
+};
+
+const ServeInfoPage = async (params: HandleHttpParams, infoHash: Infohash) => {
     const whenCsvRecord = getInfohashRecord(infoHash);
     const whenLocalDbRecord = Infohashes().selectOne(infoHash)
         .catch((error: null | undefined | { code?: "SQLITE_CANTOPEN" | unknown }) => {
@@ -143,7 +148,7 @@ const ServeInfoPage = async (params: HandleHttpParams, infoHash: string) => {
             `<script id="ssr-data-from-server" type="application/json">
                 ${escapeHtmlContent(JSON.stringify({ infoHash }))}
             </script>`,
-            Xml("script", { id: "ssr-data-from-server", type: "application/json" }, JSON.stringify({ infoHash })),
+            Xml("script", { id: "ssr-data-from-server", type: "application/json" }, JSON.stringify({ infoHash } satisfies SsrDataFromServer)),
             Xml("script", { type: "module", src: "../infoPage/index.js" }),
             Xml("script", { src: "https://unpkg.com/react@18/umd/react.development.js" }),
             Xml("script", { src: "https://unpkg.com/react-dom@18/umd/react-dom.development.js" }),

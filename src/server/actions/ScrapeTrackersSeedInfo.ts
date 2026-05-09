@@ -13,12 +13,13 @@ type TrackerRecord = TrackerRecordBase & {
 };
 
 export const trackerRecords: TrackerRecord[] = ([
+    { url: "udp://tracker.opentrackr.org:1337/announce", maxHashesPerRequest: 75 },
+    { url: "udp://open.stealth.si:80/announce", maxHashesPerRequest: 75 },
+    { url: "udp://tracker.qu.ax:6969/announce", maxHashesPerRequest: 75 },
     { url: "udp://9.rarbg.to:2920/announce", maxHashesPerRequest: 101 },
 
     { url: "udp://opentor.org:2710/announce", maxHashesPerRequest: 75 },
     { url: "udp://valakas.rollo.dnsabr.com:2710/announce", maxHashesPerRequest: 75 },
-    { url: "udp://open.stealth.si:80/announce", maxHashesPerRequest: 75 },
-    { url: "udp://tracker.opentrackr.org:1337/announce", maxHashesPerRequest: 75 },
     { url: "udp://tracker.zerobytes.xyz:1337/announce", maxHashesPerRequest: 75 },
     { url: "udp://tracker2.dler.org:80/announce", maxHashesPerRequest: 75 },
     { url: "udp://vibe.community:6969/announce", maxHashesPerRequest: 75 },
@@ -72,7 +73,6 @@ export const trackerRecords: TrackerRecord[] = ([
     { url: "udp://tracker.dler.org:6969/announce", maxHashesPerRequest: 75 },
     { url: "udp://tracker.altrosky.cc:6969/announce", maxHashesPerRequest: 75 },
     { url: "udp://tracker.bitsearch.to:1337/announce", maxHashesPerRequest: 75 }, // run by bitsearch.to search engine
-    { url: "udp://tracker.qu.ax:6969/announce", maxHashesPerRequest: 75 },
     { url: "udp://tracker.theoks.net:6969/announce", maxHashesPerRequest: 75 },
     { url: "udp://tracker.gmi.gd:6969/announce", maxHashesPerRequest: 75 },
     { url: "udp://tracker.fnix.net:6969/announce", maxHashesPerRequest: 75 },

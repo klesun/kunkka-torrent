@@ -16,6 +16,7 @@ import ScrapeTrackersSeedInfo from "./actions/ScrapeTrackersSeedInfo";
 import { IS_P2P_FORBIDDEN } from "./torrent-backends/ITorrentBackend.ts";
 import type { Infohash } from "../common/types.ts";
 import { backend } from "./torrent-backends/ActiveBackend.ts";
+import type { JsonValue } from "@mhc/utils/types/utility";
 const { spawn } = require("child_process");
 const unzip = require("unzip-stream");
 const srt2vtt = require("srt-to-vtt");
@@ -492,6 +493,19 @@ const apiRouter: Record<string, ActionForApi> = {
 
 const appStartTime = new Date().toISOString();
 
+const getCircularReplacer = () => {
+  const seen = new WeakSet();
+  return (key: string, value: JsonValue) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        return;
+      }
+      seen.add(value);
+    }
+    return value;
+  };
+};
+
 const HandleHttpRequest = async (params: HandleHttpParams) => {
     const { rq, rs, rootPath, api } = params;
     const parsedUrl = url.parse(<string>rq.url);
@@ -514,7 +528,7 @@ const HandleHttpRequest = async (params: HandleHttpParams) => {
             .then(result => {
                 rs.setHeader("Content-Type", "application/json");
                 rs.statusCode = 200;
-                rs.end(JSON.stringify(result));
+                rs.end(JSON.stringify(result, getCircularReplacer()));
             });
     } else if (pathname === "/ping") {
         rs.setHeader("Content-Type", "application/json");
@@ -543,6 +557,7 @@ const HandleHttpRequest = async (params: HandleHttpParams) => {
         pathname.match(/^\/views\/infoPage\/([a-zA-Z2-7]{32})$/) // base32
     )) {
         const infoHash = match[1];
+        assertValidInfoHash(infoHash);
         return ServeInfoPage(params, infoHash);
     } else {
         return serveStaticFile(pathname, params);

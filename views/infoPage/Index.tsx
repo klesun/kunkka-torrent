@@ -4,7 +4,7 @@ import FixNaturalOrder from "../../src/common/FixNaturalOrder.js";
 import type { IApi_connectToSwarm_rs, IApi_getSwarmInfo_rs } from "../../src/server/Api.ts";
 import type { ShortTorrentFileInfo } from "../../src/server/torrent-backends/ITorrentBackend";
 import type { FfprobeOutput, FfprobeAudioStream, FfprobeStream } from "../../src/client/FfprobeOutput.ts";
-import type { FileHeader } from "node-unrar-js/src/js/extractor.ts";
+import type { FileHeader } from "node-unrar-js/dist/js/extractor";
 import { BACKEND_BASE_URL } from "../../src/client/ApiUntyped.js";
 
 const { React } = window;

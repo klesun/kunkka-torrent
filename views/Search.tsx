@@ -70,19 +70,18 @@ const getInfoHashNow = (resultItem: QbtSearchResultItemExtended): { infoHash: st
  */
 function ParallelCap(maxParallelActions: number) {
     const inProgress = new Set<Promise<unknown>>();
-    const delayed = [];
 
     async function enqueue<T>(action: () => Promise<T>): Promise<T> {
         if (inProgress.size < maxParallelActions) {
-            const whenDone = action();
-            inProgress.add(whenDone.finally(() => inProgress.delete(whenDone)));
+            const whenDone = action().finally(() => inProgress.delete(whenDone));
+            inProgress.add(whenDone);
             return whenDone;
         } else {
             while (inProgress.size >= maxParallelActions) {
                 await Promise.race(inProgress).catch(() => {});
             }
-            const whenDone = action();
-            inProgress.add(whenDone.finally(() => inProgress.delete(whenDone)));
+            const whenDone = action().finally(() => inProgress.delete(whenDone));
+            inProgress.add(whenDone);
             return whenDone;
         }
     }

@@ -21,10 +21,14 @@ echo "$ACR_TOKEN" | docker login kunkkatorrents.azurecr.io -u 00000000-0000-0000
 # Stop existing container if any
 docker rm -f kunkka-torrent 2>/dev/null || true
 
+mkdir -p /etc/kunkka-letsencrypt
+
 docker pull kunkkatorrents.azurecr.io/kunkka-torrent:latest
+
 docker run -d --name kunkka-torrent --restart unless-stopped \
   -p 80:80 -p 443:443 -p 6881:6881/tcp -p 6881:6881/udp \
   -e PORT=80 -e WEBSITE_SITE_NAME=kunkka-torrent \
   -v /mnt/kunkka-db-files:/mnt/kunkka-db-files \
+  -v /etc/kunkka-letsencrypt:/etc/letsencrypt \
   kunkkatorrents.azurecr.io/kunkka-torrent:latest
 echo "Container started successfully"

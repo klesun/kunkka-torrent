@@ -144,7 +144,7 @@ const skippedRanges = [
     { startId: 1933143, endId: 1933143 },
 ];
 
-const NEXT_ID = 153619;
+const NEXT_ID = 0;
 
 let i = 0;
 let unflushedRows: InfohashDbRow[] = [];

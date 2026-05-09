@@ -9,10 +9,13 @@ qbittorrent-nox &
 QBT_PID=$!
 npm start &
 NODE_PID=$!
+/mnt/kunkka-db-files/zhopa_linux >> /mnt/kunkka-db-files/dht_crawl.txt 2>/dev/null &
+ZHOPA_PID=$!
 
 # Exit when any background process dies so Docker restarts the container
 wait -n
 kill -0 $JACKETT_PID 2>/dev/null || echo "[start.sh] Jackett (pid $JACKETT_PID) died" >&2
 kill -0 $QBT_PID    2>/dev/null || echo "[start.sh] qbittorrent-nox (pid $QBT_PID) died" >&2
 kill -0 $NODE_PID   2>/dev/null || echo "[start.sh] npm start (pid $NODE_PID) died" >&2
+kill -0 $ZHOPA_PID   2>/dev/null || echo "[start.sh] zhopa (pid $ZHOPA_PID) died" >&2
 exit 1

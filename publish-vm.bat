@@ -1,5 +1,7 @@
 @echo on
 
+call npx webpack
+
 set ACR_NAME=kunkkatorrents
 set VM_NAME=kunkka-torrent-vm
 set RESOURCE_GROUP=DefaultResourceGroup-NEU

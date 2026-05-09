@@ -18,33 +18,16 @@ ACR_TOKEN=$(curl -sf -X POST 'https://kunkkatorrents.azurecr.io/oauth2/exchange'
   | python3 -c 'import sys,json; print(json.load(sys.stdin)["refresh_token"])')
 echo "$ACR_TOKEN" | docker login kunkkatorrents.azurecr.io -u 00000000-0000-0000-0000-000000000000 --password-stdin
 
-# Stop existing container so port 80 is free for certbot standalone
+# Stop existing container if any
 docker rm -f kunkka-torrent 2>/dev/null || true
 
-# Obtain/renew Let's Encrypt certificate on the host (avoids Python/certbot bugs inside container)
-apt-get install -y certbot -qq
 mkdir -p /etc/kunkka-letsencrypt
-CERT_FILE="/etc/kunkka-letsencrypt/live/torrent.klesun.net/fullchain.pem"
-if [ ! -f "$CERT_FILE" ]; then
-  certbot certonly --standalone \
-    --non-interactive --agree-tos \
-    --email artur.klesun@sensortower.com \
-    --domain torrent.klesun.net \
-    --config-dir /etc/kunkka-letsencrypt \
-    --work-dir /tmp/certbot-work \
-    --logs-dir /tmp/certbot-logs || echo "certbot failed - will run HTTP-only until cert is available"
-else
-  certbot renew --standalone \
-    --config-dir /etc/kunkka-letsencrypt \
-    --work-dir /tmp/certbot-work \
-    --logs-dir /tmp/certbot-logs || echo "certbot renew failed - continuing with existing cert"
-fi
 
 docker pull kunkkatorrents.azurecr.io/kunkka-torrent:latest
 
 docker run -d --name kunkka-torrent --restart unless-stopped \
   -p 80:80 -p 443:443 -p 6881:6881/tcp -p 6881:6881/udp \
-  -e PORT=3000 -e WEBSITE_SITE_NAME=kunkka-torrent \
+  -e PORT=80 -e WEBSITE_SITE_NAME=kunkka-torrent \
   -v /mnt/kunkka-db-files:/mnt/kunkka-db-files \
   -v /etc/kunkka-letsencrypt:/etc/letsencrypt \
   kunkkatorrents.azurecr.io/kunkka-torrent:latest

@@ -24,6 +24,8 @@ const SKIP = new Set([
   'wolfmax4k','xxxclub','zamundarip',
   // timeout / down / other errors — confirmed never returning results
   'newstudio','demonoid-clone','ilcorsaronero','tokyotosho','torrentkitty','anisource',
+  // 404 on all attempts to download torrent file
+  'damagnet', 'aniRena', 'torrentdownload', 'limetorrents', 'torrentgalaxyclone',
 ]);
 const d = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
 d.filter(x => x.type === 'public' && !SKIP.has(x.id)).forEach(x => console.log(x.id));

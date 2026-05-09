@@ -74,7 +74,7 @@ function parseNyaaSiPage(document: Document) {
     return {
         infoHash: infoHash ?? neverNull("infoHash"),
         name: document.querySelector("h3.panel-title")?.textContent?.trim() ?? neverNull("panel-title"),
-        description: description,
+        description: description ?? "",
         fields: parseRows([...rows]),
     };
 }

@@ -72,7 +72,7 @@ const Qbtv2 = ({ port = 44011 } = {}) => {
         search: {
             /** @see https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#start-search */
             start: async (rq: http.IncomingMessage, rs: http.ServerResponse) => {
-                const url = "http://localhost:" + port + "/api/v2/search/start";
+                const url = "http://127.0.0.1:" + port + "/api/v2/search/start";
 
                 const params: RequestInit = {
                     // needed for cookie, too lazy to parse it on node's side
@@ -104,7 +104,7 @@ const Qbtv2 = ({ port = 44011 } = {}) => {
             /** @see https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-search-results */
             results: async (rq: http.IncomingMessage, rs: http.ServerResponse) => {
                 const rqBody = await readPost(rq);
-                const url = "http://localhost:" + port + "/api/v2/search/results";
+                const url = "http://127.0.0.1:" + port + "/api/v2/search/results";
                 const fetchRs = await fetch(url, {
                     // needed for cookie, too lazy to parse it on node's side
                     headers: {

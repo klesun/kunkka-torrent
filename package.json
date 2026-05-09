@@ -58,6 +58,7 @@
         "@types/webtorrent": "^0.110.1",
         "@typescript-eslint/eslint-plugin": "^8.46.0",
         "@typescript-eslint/parser": "^8.46.0",
+        "bittorrent-protocol": "^5.0.0",
         "buffer": "^6.0.3",
         "crypto-browserify": "^3.12.0",
         "eslint": "^9.37.0",

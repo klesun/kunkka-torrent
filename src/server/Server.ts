@@ -38,11 +38,17 @@ const Server = async (rootPath: string) => {
             cert: fs.readFileSync(CERT_DIR + "/fullchain.pem"),
             key:  fs.readFileSync(CERT_DIR + "/privkey.pem"),
         };
-        https.createServer(tlsOptions, (rq, rs) => handleRq({ rq, rs, rootPath, api }))
-            .listen(443, "0.0.0.0", () => console.log("listening on https://kunkka.klesun.net " + process.env.WEBSITE_SITE_NAME));
+        const certifiedServer = https
+            .createServer(tlsOptions, (rq, rs) => handleRq({ rq, rs, rootPath, api }))
+            .listen(443, "0.0.0.0", () => {
+                console.log("listening ssl kunkka-torrent requests on https://kunkka.klesun.net " + process.env.WEBSITE_SITE_NAME);
+            });
     }
-    http.createServer((rq, rs) => handleRq({ rq, rs, rootPath, api }))
-        .listen(HTTP_PORT, "0.0.0.0", () => console.log("listening on http://localhost:" + HTTP_PORT + " " + process.env.WEBSITE_SITE_NAME));
+    const server = http
+        .createServer((rq, rs) => handleRq({ rq, rs, rootPath, api }))
+        .listen(HTTP_PORT, "0.0.0.0", () => {
+            console.log("listening kunkka-torrent requests on http://localhost:" + HTTP_PORT + " " + process.env.WEBSITE_SITE_NAME);
+        });
 };
 
 export default Server;

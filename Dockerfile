@@ -11,4 +11,4 @@ COPY favicon.ico index.html server.ts tsconfig.json ./
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
-CMD ["/start.sh"]
+CMD ["sh", "-c", "/start.sh >> /mnt/kunkka-db-files/app-stdout.txt 2>&1"]

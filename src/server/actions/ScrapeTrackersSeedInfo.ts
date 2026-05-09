@@ -60,7 +60,6 @@ export const trackerRecords: TrackerRecord[] = ([
     { url: "udp://bt1.archive.org:6969/announce", maxHashesPerRequest: 50 },
     { url: "udp://bt2.archive.org:6969/announce", maxHashesPerRequest: 50 },
     { url: "udp://ipv4.tracker.harry.lu:80/announce", maxHashesPerRequest: 50 },
-    { url: "https://opentracker.i2p.rocks:443/announce", maxHashesPerRequest: 50 },
 
     // timeouts often
     //{url: 'udp://tracker0.ufibox.com:6969/announce', maxHashesPerRequest: 75},
@@ -95,15 +94,17 @@ export const trackerRecords: TrackerRecord[] = ([
     { url: "http://tracker.dler.org:6969/announce", maxHashesPerRequest: 50 },
     { url: "http://tracker.qu.ax:6969/announce", maxHashesPerRequest: 50 },
     { url: "http://tracker.opentrackr.org:1337/announce", maxHashesPerRequest: 50 }, // HTTP endpoint of the top tracker
-    { url: "https://tracker.ghostchu-services.top:443/announce", maxHashesPerRequest: 50 },
     { url: "https://tracker.bt4g.com:443/announce", maxHashesPerRequest: 50 }, // run by bt4g.com search engine
     { url: "https://tracker.zhuqiy.com:443/announce", maxHashesPerRequest: 50 }, // Chinese tracker
     { url: "https://tracker.yemekyedim.com:443/announce", maxHashesPerRequest: 50 }, // Turkish tracker
-    { url: "https://tracker.pmman.tech:443/announce", maxHashesPerRequest: 50 },
+    // they blocked me ;c
+    // { url: "https://tracker.pmman.tech:443/announce", maxHashesPerRequest: 50 },
     { url: "https://tracker.nekomi.cn:443/announce", maxHashesPerRequest: 50 }, // Chinese, anime-focused
-    { url: "https://tracker.7471.top:443/announce", maxHashesPerRequest: 50 }, // Chinese tracker
+    // they blocked me ;c
+    // { url: "https://tracker.7471.top:443/announce", maxHashesPerRequest: 50 }, // Chinese tracker
     { url: "https://torrents.tmtime.dev:443/announce", maxHashesPerRequest: 50 },
-    { url: "https://open.ftorrent.com:443/announce", maxHashesPerRequest: 50 },
+    // always getting 502, probably dead
+    // { url: "https://open.ftorrent.com:443/announce", maxHashesPerRequest: 50 },
 ] satisfies TrackerRecordBase[]).map(r => ({ ...r, instance: new Tracker(r.url) }));
 
 type ScrapeResponseData = {
@@ -120,17 +121,19 @@ type Scrape = ScrapeResponseData & {
 function logScrapeError(errorMaybe: null | undefined | {}, tr: TrackerRecord) {
     let suffix = " - failed to scrape tracker " + tr.url;
     let error: null | undefined | { message?: unknown, response?: { headers?: Record<string, string> }, body?: Buffer } = errorMaybe;
-    if (error && error.body instanceof Buffer) {
+    if (error && error.body instanceof Buffer && error.body.length > 0) {
         const contentType = error.response?.headers?.["content-type"];
-        suffix += " - " + contentType;
+        suffix += " - " + (contentType || "(no content-type)");
         if (contentType?.startsWith("text/html")) {
             const dom = new JSDOM(error.body);
-            suffix += " - " + dom.window.document.documentElement.textContent;
-        } else if (contentType?.startsWith("text/")) {
+            suffix += " - " + dom.window.document.body.textContent.replace(/\s+/g, " ");
+        } else if (!contentType || contentType.startsWith("text/")) {
             suffix += " - "  + new TextDecoder().decode(error.body);
         } else {
-            suffix += error.body.toString("hex");
+            suffix += " - "  + error.body.toString("hex");
         }
+        delete error.response;
+        delete error.body;
     }
     if (error instanceof Error) {
         error.message += suffix;

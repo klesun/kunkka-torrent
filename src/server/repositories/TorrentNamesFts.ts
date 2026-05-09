@@ -1,6 +1,7 @@
 import DbPool, { SQLITE_MAX_VARIABLE_NUMBER } from "../utils/DbPool";
 import type { UntabledQueryBase } from "klesun-node-tools/src/Utils/SqlUtil";
 import * as SqlUtil from "klesun-node-tools/src/Utils/SqlUtil.js";
+import { IS_AZURE_ENV } from "../Constants.ts";
 
 export type DbRow = {
     infohash: string,
@@ -10,7 +11,10 @@ export type DbRow = {
 const TorrentNamesFts = () => {
     const table = "TorrentNamesFts";
     const dbPool = DbPool({
-        filename: __dirname + "/../../../data/db/" + table + ".sqlite",
+        filename: IS_AZURE_ENV
+            ? "/mnt/kunkka-db-files/TorrentNamesFts.sqlite"
+            // language=file-reference
+            : __dirname + "/../../../data/db/TorrentNamesFts.sqlite",
     });
     return {
         delete: async (params: UntabledQueryBase) => {

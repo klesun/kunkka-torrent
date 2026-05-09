@@ -2,6 +2,7 @@ import DbPool, { SQLITE_MAX_VARIABLE_NUMBER } from "../utils/DbPool";
 import type { InfohashDbRow, TrackerData } from "../typing/InfohashDbRow";
 import * as SqlUtil from "klesun-node-tools/src/Utils/SqlUtil.js";
 import type { Database } from "sqlite";
+import { IS_AZURE_ENV } from "../Constants.ts";
 
 const ENDED = Symbol("ENDED");
 type ENDED = typeof ENDED;
@@ -114,8 +115,10 @@ export type AppInfohash = ReturnType<typeof deserialize>;
 const Infohashes = () => {
     const table = "Infohashes";
     const dbPool = DbPool({
-        // language=file-reference
-        filename: __dirname + "/" + "../../../data/db/Infohashes.sqlite",
+        filename: IS_AZURE_ENV
+            ? "/mnt/kunkka-db-files/Infohashes.sqlite"
+            // language=file-reference
+            : __dirname + "/" + "../../../data/db/Infohashes.sqlite",
     });
 
     return {

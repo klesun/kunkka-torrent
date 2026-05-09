@@ -64,12 +64,46 @@ const getInfoHashNow = (resultItem: QbtSearchResultItemExtended): { infoHash: st
     }
 };
 
+/**
+ * lets you run a bunch of actions with a guarantee that no more than `maxParallelActions` will be running at same time
+ * needed for HTTP requests that throttle browser network in this app
+ */
+function ParallelCap(maxParallelActions: number) {
+    const inProgress = new Set<Promise<unknown>>();
+    const delayed = [];
+
+    async function enqueue<T>(action: () => Promise<T>): Promise<T> {
+        if (inProgress.size < maxParallelActions) {
+            const whenDone = action();
+            inProgress.add(whenDone.finally(() => inProgress.delete(whenDone)));
+            return whenDone;
+        } else {
+            while (inProgress.size >= maxParallelActions) {
+                await Promise.race(inProgress).catch(() => {});
+            }
+            const whenDone = action();
+            inProgress.add(whenDone.finally(() => inProgress.delete(whenDone)));
+            return whenDone;
+        }
+    }
+
+    return {
+        enqueue,
+    };
+}
+
+const torrentFileDownloadParallelCap = ParallelCap(5);
+
+function downloadTorrentFile(fileUrl: string) {
+    return torrentFileDownloadParallelCap.enqueue(() => api.downloadTorrentFile({ fileUrl }));
+}
+
 const getInfoHash = async (resultItem: QbtSearchResultItemExtended): Promise<{ infoHash: string, tr: string[] }> => {
     const now = getInfoHashNow(resultItem);
     if (now) {
         return now;
     } else {
-        const torrentFileData = await api.downloadTorrentFile({ fileUrl: resultItem.fileUrl });
+        const torrentFileData = await downloadTorrentFile(resultItem.fileUrl);
         return {
             infoHash: torrentFileData.infoHash,
             tr: torrentFileData.announce,

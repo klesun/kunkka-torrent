@@ -172,9 +172,14 @@ function ResultRow(props: {
     >
         <button>Open</button>
     </a>;
-    const downloadAnchor = resultItem.fileUrl?.startsWith("http://127.0.0.1:9117/dl/")
+    const downloadUrl = infoHash
+        ? "magnet:?xt=urn:btih:" + infoHash
+        : resultItem.fileUrl?.startsWith("http://127.0.0.1:9117/dl/")
+        ? null
+        : resultItem.fileUrl;
+    const downloadAnchor = !downloadUrl
         ? <span title={resultItem.fileUrl}>(Jackett Handle)</span>
-        : <a href={resultItem.fileUrl}>
+        : <a href={downloadUrl}>
             {infoHash || resultItem.fileUrl.replace(/^https?:\/\/[^\/?]*/, "")}
         </a>;
 

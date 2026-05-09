@@ -1,6 +1,14 @@
 #cloud-config
 # After VM creation, place storage key in /etc/kunkka-storage.key then run docker/vm-start.sh
+write_files:
+  - path: /etc/systemd/system/docker.service.d/after-smb.conf
+    content: |
+      [Unit]
+      After=mnt-kunkka\x2ddb\x2dfiles.mount
+    permissions: '0644'
+
 runcmd:
   - curl -fsSL https://get.docker.com | sh
   - apt-get install -y cifs-utils -qq
   - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+  - systemctl daemon-reload

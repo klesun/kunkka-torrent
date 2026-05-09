@@ -352,6 +352,7 @@ const serveStreamedApiResponse = async <TItem>(
         for await (const item of itemsIter) {
             if (!started) {
                 res.setHeader("content-type", "application/json");
+                res.setHeader("X-Accel-Buffering", "no");
                 res.statusCode = 200;
                 res.write("[\n");
                 started = true;

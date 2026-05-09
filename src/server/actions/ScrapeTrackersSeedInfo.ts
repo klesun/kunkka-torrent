@@ -1,6 +1,7 @@
 
 // @ts-ignore
 import Tracker = require("torrent-tracker");
+import { JSDOM } from "jsdom";
 
 type TrackerRecordBase = {
     url: string,
@@ -37,7 +38,6 @@ export const trackerRecords: TrackerRecord[] = ([
 
     { url: "udp://tracker.internetwarriors.net:1337/announce", maxHashesPerRequest: 50 },
     { url: "udp://tracker1.bt.moack.co.kr:80/announce", maxHashesPerRequest: 50 },
-    { url: "udp://opentracker.i2p.rocks:6969/announce", maxHashesPerRequest: 50 },
     { url: "udp://explodie.org:6969/announce", maxHashesPerRequest: 50 },
     { url: "udp://u.wwwww.wtf:1/announce", maxHashesPerRequest: 50 },
     { url: "udp://tracker.coppersurfer.tk:6969/announce", maxHashesPerRequest: 50 },
@@ -88,18 +88,13 @@ export const trackerRecords: TrackerRecord[] = ([
     { url: "udp://udp.tracker.projectk.org:23333/announce", maxHashesPerRequest: 75 },
 
     { url: "udp://tracker.plx.im:6969/announce", maxHashesPerRequest: 50 },
-    { url: "udp://utracker.ghostchu-services.top:6969/announce", maxHashesPerRequest: 50 }, // GhostChu services
     { url: "udp://tracker.t-1.org:6969/announce", maxHashesPerRequest: 50 },
     { url: "udp://ipv4.tracker.harry.lu:80/announce", maxHashesPerRequest: 50 }, // IPv4-only
     { url: "udp://bt1.archive.org:6969/announce", maxHashesPerRequest: 50 }, // Internet Archive tracker
     { url: "udp://bt2.archive.org:6969/announce", maxHashesPerRequest: 50 }, // Internet Archive tracker (secondary)
-    { url: "http://tracker.gbitt0.info:80/announce", maxHashesPerRequest: 50 },
     { url: "http://tracker.dler.org:6969/announce", maxHashesPerRequest: 50 },
     { url: "http://tracker.qu.ax:6969/announce", maxHashesPerRequest: 50 },
     { url: "http://tracker.opentrackr.org:1337/announce", maxHashesPerRequest: 50 }, // HTTP endpoint of the top tracker
-    { url: "https://tracker.gbitt0.info:443/announce", maxHashesPerRequest: 50 },
-    { url: "https://tracker.tamersunion.org:443/announce", maxHashesPerRequest: 50 }, // anime-focused community tracker
-    { url: "https://opentracker.i2p.rocks:443/announce", maxHashesPerRequest: 50 }, // also serves i2p network
     { url: "https://tracker.ghostchu-services.top:443/announce", maxHashesPerRequest: 50 },
     { url: "https://tracker.bt4g.com:443/announce", maxHashesPerRequest: 50 }, // run by bt4g.com search engine
     { url: "https://tracker.zhuqiy.com:443/announce", maxHashesPerRequest: 50 }, // Chinese tracker
@@ -122,6 +117,29 @@ type Scrape = ScrapeResponseData & {
     trackerUrl: string,
 };
 
+function logScrapeError(errorMaybe: null | undefined | {}, tr: TrackerRecord) {
+    let suffix = " - failed to scrape tracker " + tr.url;
+    let error: null | undefined | { message?: unknown, response?: { headers?: Record<string, string> }, body?: Buffer } = errorMaybe;
+    if (error && error.body instanceof Buffer) {
+        const contentType = error.response?.headers?.["content-type"];
+        suffix += " - " + contentType;
+        if (contentType?.startsWith("text/html")) {
+            const dom = new JSDOM(error.body);
+            suffix += " - " + dom.window.document.documentElement.textContent;
+        } else if (contentType?.startsWith("text/")) {
+            suffix += " - "  + new TextDecoder().decode(error.body);
+        } else {
+            suffix += error.body.toString("hex");
+        }
+    }
+    if (error instanceof Error) {
+        error.message += suffix;
+    } else {
+        error = new Error(String(error) + suffix);
+    }
+    console.warn(error);
+}
+
 /**
  * Doing requests sequentially for a given tracker. Could
  * parallelize them, but I do not want to get my ip banned
@@ -133,14 +151,12 @@ const scrapeTracker = async function*(tr: TrackerRecord, infohashes: string[]): 
         let msg;
         try {
             msg = await new Promise<Record<string, ScrapeResponseData>>((resolve, reject) => {
-                tracker.scrape(chunk, { timeout: 15000 }, (err: unknown, msg: Record<string, ScrapeResponseData>) => {
+                tracker.scrape(chunk, { timeout: 45000 }, (err: unknown, msg: Record<string, ScrapeResponseData>) => {
                     err ? reject(err) : resolve(msg);
                 });
             });
         } catch (error: unknown) {
-            (error as any).message += " at " + tr.url;
-            console.warn("Failed to scrape tracker " + tr.url);
-            console.warn(error);
+            logScrapeError(error, tr);
             return;
         }
         for (const [infohash, data] of Object.entries(msg)) {

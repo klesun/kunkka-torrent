@@ -96,6 +96,7 @@ const Api = () => {
         downloadTorrentFile: (params: { fileUrl: string }) => get<{ infoHash: string, announce: string[] }>("/api/downloadTorrentFile", params),
         prepareZipReader: (params: { infoHash: string, filePath: string }) => getAsyncIter<{ path: string, size: number }>("/api/prepareZipReader", params),
         scrapeTrackersSeedInfo: (params: { torrents: { infohash: string }[] }) => postAsyncIter<{
+            type: "error" | "result" | "end",
             seeders: number,
             completed: number,
             leechers: number,

@@ -421,11 +421,15 @@ export default function Search(props: {
             }));
             api.scrapeTrackersSeedInfo({ torrents }).then(async (scrapes) => {
                 for await (const scrape of scrapes) {
-                    setInfoHashToScrape(prev => {
-                        const next = new Map(prev);
-                        next.set(toLowerCase(scrape.infohash), scrape);
-                        return next;
-                    });
+                    if (scrape.type === "result") {
+                        setInfoHashToScrape(prev => {
+                            const next = new Map(prev);
+                            next.set(toLowerCase(scrape.infohash), scrape);
+                            return next;
+                        });
+                    } else {
+                        console.warn("scrape event", scrape);
+                    }
                 }
             });
             for (const record of newRecords) {

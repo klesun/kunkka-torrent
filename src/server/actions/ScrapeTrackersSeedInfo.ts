@@ -2,6 +2,7 @@
 // @ts-ignore
 import Tracker = require("torrent-tracker");
 import { JSDOM } from "jsdom";
+import { stringifyError } from "../../common/typedUtils.ts";
 
 type TrackerRecordBase = {
     url: string,
@@ -113,12 +114,20 @@ type ScrapeResponseData = {
     leechers: number,
 };
 
-type Scrape = ScrapeResponseData & {
+type ScrapeResult = ScrapeResponseData & {
+    type: "result",
     infohash: string,
     trackerUrl: string,
 };
 
-function logScrapeError(errorMaybe: null | undefined | {}, tr: TrackerRecord) {
+type Scrape = ScrapeResult | {
+    type: "error",
+    error: string,
+    chunk: string[],
+    trackerUrl: string,
+};
+
+function makeScrapeError(errorMaybe: null | undefined | {}, tr: TrackerRecord) {
     let suffix = " - failed to scrape tracker " + tr.url;
     let error: null | undefined | { message?: unknown, response?: { headers?: Record<string, string> }, body?: Buffer } = errorMaybe;
     if (error && error.body instanceof Buffer && error.body.length > 0) {
@@ -140,7 +149,7 @@ function logScrapeError(errorMaybe: null | undefined | {}, tr: TrackerRecord) {
     } else {
         error = new Error(String(error) + suffix);
     }
-    console.warn(error);
+    return error;
 }
 
 /**
@@ -159,11 +168,12 @@ const scrapeTracker = async function*(tr: TrackerRecord, infohashes: string[]): 
                 });
             });
         } catch (error: unknown) {
-            logScrapeError(error, tr);
+            error = makeScrapeError(error, tr);
+            yield { type: "error", error: stringifyError(error), chunk, trackerUrl: tr.url };
             return;
         }
         for (const [infohash, data] of Object.entries(msg)) {
-            yield { ...data, infohash, trackerUrl: tr.url };
+            yield { type: "result", ...data, infohash, trackerUrl: tr.url };
         }
     }
 };
@@ -208,8 +218,12 @@ const combine = async function*<T>(
 /** @return - incrementally only better options for a given infohash */
 const ScrapeTrackersSeedInfo = async function*(infohashes: string[]) {
     const generators = trackerRecords.map(tr => scrapeTracker(tr, infohashes));
-    const hashToBestScrape = new Map<string, Scrape>();
+    const hashToBestScrape = new Map<string, ScrapeResult>();
     for await (const scrape of combine(generators)) {
+        if (scrape.type === "error") {
+            yield scrape;
+            continue;
+        }
         //console.log(JSON.stringify(scrape));
         const old = hashToBestScrape.get(scrape.infohash);
         if (!old ||

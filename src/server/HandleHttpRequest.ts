@@ -3,10 +3,9 @@ import pump from "pump";
 import * as fsSync from "fs";
 import type * as http from "http";
 import type { IApi } from "./Api.ts";
-import type { SerialData, CompatHttpRq, CompatHttpRs } from "./TypeDefs";
+import type { SerialData } from "./TypeDefs";
 import { lookup } from "mime-types";
 import { HTTP_PORT } from "./Constants";
-import type { Writable } from "stream";
 import type * as EventEmitter from "events";
 import type { ReadStream } from "fs";
 import ServeInfoPage from "./actions/ServeInfoPage";
@@ -17,13 +16,14 @@ import { IS_P2P_FORBIDDEN } from "./torrent-backends/ITorrentBackend.ts";
 import type { Infohash } from "../common/types.ts";
 import { backend } from "./torrent-backends/ActiveBackend.ts";
 import type { JsonValue } from "@mhc/utils/types/utility";
+import type { Http2ServerRequest,Http2ServerResponse } from "node:http2";
 const { spawn } = require("child_process");
 const unzip = require("unzip-stream");
 const srt2vtt = require("srt-to-vtt");
 const fs = fsSync.promises;
 
 
-const ignoreEpipe = (rs: CompatHttpRs) => {
+const ignoreEpipe = (rs: http.ServerResponse | Http2ServerResponse) => {
     rs.on("error", (err: NodeJS.ErrnoException) => {
         if (err.code !== "EPIPE") {
             console.error("Response stream error", err);
@@ -31,14 +31,16 @@ const ignoreEpipe = (rs: CompatHttpRs) => {
     });
 };
 
+export type AnyHttpResponse = (http.ServerResponse | Http2ServerResponse) & { write: (chunk: string) => void };
+
 export interface HandleHttpParams {
-    rq: CompatHttpRq,
-    rs: CompatHttpRs,
+    rq: http.IncomingMessage | Http2ServerRequest,
+    rs: AnyHttpResponse,
     rootPath: string,
     api: IApi,
 }
 
-const redirect = (rs: CompatHttpRs, url: string) => {
+const redirect = (rs: http.ServerResponse | Http2ServerResponse, url: string) => {
     rs.writeHead(302, {
         "Location": url,
     });
@@ -67,7 +69,7 @@ const removeDots = (path: string) => {
     return resultParts.join("/");
 };
 
-const setCorsHeaders = (rs: CompatHttpRs) => {
+const setCorsHeaders = (rs: http.ServerResponse | Http2ServerResponse) => {
     rs.setHeader("Access-Control-Allow-Origin", "*");
     rs.setHeader("Access-Control-Allow-Methods", "GET, POST");
     rs.setHeader("Access-Control-Allow-Headers", "X-Requested-With,content-type,pragma,cache-control");
@@ -364,7 +366,7 @@ type UnzipEntry = {
 };
 
 const serveStreamedApiResponse = async <TItem>(
-    res: CompatHttpRs,
+    res: AnyHttpResponse,
     itemsIter: AsyncGenerator<TItem>,
 ) => {
     let started = false;
@@ -491,7 +493,7 @@ const serveZipReaderFile = async (params: HandleHttpParams) => {
     });
 };
 
-type Action = (rq: CompatHttpRq, rs: CompatHttpRs) => Promise<SerialData> | SerialData;
+type Action = (rq: http.IncomingMessage | Http2ServerRequest, rs: http.ServerResponse | Http2ServerResponse) => Promise<SerialData> | SerialData;
 type ActionForApi = (api: IApi) => Action;
 
 const apiRouter: Record<string, ActionForApi> = {

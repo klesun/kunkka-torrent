@@ -1,12 +1,7 @@
-type ReadableRq = {
-    method?: string;
-    on(event: "data", listener: (chunk: Buffer | string) => void): unknown;
-    on(event: "end" | "close", listener: () => void): unknown;
-    on(event: "error", listener: (err: Error) => void): unknown;
-    on(event: string, listener: (...args: unknown[]) => void): unknown;
-};
+import type * as http from "http";
+import type { Http2ServerRequest } from "node:http2";
 
-export const readPost = (rq: ReadableRq) => new Promise<string>((ok, err) => {
+export const readPost = (rq: http.IncomingMessage | Http2ServerRequest) => new Promise<string>((ok, err) => {
     if (rq.method === "POST") {
         let body = "";
         rq.on("data", (data: Buffer | string) => { body += data.toString(); });

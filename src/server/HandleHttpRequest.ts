@@ -22,6 +22,14 @@ const unzip = require("unzip-stream");
 const srt2vtt = require("srt-to-vtt");
 const fs = fsSync.promises;
 
+const ignoreEpipe = (rs: http.ServerResponse) => {
+    rs.on("error", (err: NodeJS.ErrnoException) => {
+        if (err.code !== "EPIPE") {
+            console.error("Response stream error", err);
+        }
+    });
+};
+
 export interface HandleHttpParams {
     rq: http.IncomingMessage,
     rs: http.ServerResponse,
@@ -152,6 +160,7 @@ const getFileInTorrent = async (params: HandleHttpParams) => {
 
 const serveTorrentStream = async (params: HandleHttpParams) => {
     const { rq, rs } = params;
+    ignoreEpipe(rs);
     const { file } = await getFileInTorrent(params);
 
     rs.setHeader("Content-Disposition", `inline; filename=` + JSON.stringify(file.name).replace(/[^ -~]/g, "?"));
@@ -199,6 +208,7 @@ const serveTorrentStream = async (params: HandleHttpParams) => {
 
 const serveTorrentStreamEnsureVtt = async (params: HandleHttpParams) => {
     const { rs } = params;
+    ignoreEpipe(rs);
     const { file } = await getFileInTorrent(params);
 
     rs.setHeader("Content-Length", file.length);
@@ -210,6 +220,7 @@ const serveTorrentStreamEnsureVtt = async (params: HandleHttpParams) => {
 
 const serveTorrentStreamCodeInH264 = async (params: HandleHttpParams) => {
     const { rq, rs } = params;
+    ignoreEpipe(rs);
     const { infoHash, filePath } = <Record<string, string>>url.parse(<string>rq.url, true).query;
     assertValidInfoHash(infoHash);
     await backend.prepareTorrentStream(infoHash);
@@ -253,6 +264,7 @@ const serveTorrentStreamCodeInH264 = async (params: HandleHttpParams) => {
 
 const serveTorrentStreamExtractSubs = async (params: HandleHttpParams) => {
     const { rq, rs } = params;
+    ignoreEpipe(rs);
     const { infoHash, filePath, subsIndex } = <Record<string, string>>url.parse(<string>rq.url, true).query;
     assertValidInfoHash(infoHash);
     await backend.prepareTorrentStream(infoHash);
@@ -276,6 +288,7 @@ const serveTorrentStreamExtractSubs = async (params: HandleHttpParams) => {
 
 const serveTorrentStreamExtractAudio = async (params: HandleHttpParams) => {
     const { rq, rs } = params;
+    ignoreEpipe(rs);
     const { infoHash, filePath, streamIndex, codecName } = <Record<string, string>>url.parse(<string>rq.url, true).query;
     rq.connection.setTimeout(3600000);
     assertValidInfoHash(infoHash);

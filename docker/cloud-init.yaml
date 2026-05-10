@@ -5,6 +5,7 @@ write_files:
     content: |
       [Unit]
       After=mnt-kunkka\x2ddb\x2dfiles.mount
+      Requires=mnt-kunkka\x2ddb\x2dfiles.mount
     permissions: '0644'
 
 runcmd:

@@ -178,16 +178,6 @@ const serveTorrentStream = async (params: HandleHttpParams) => {
         if (rq.method === "HEAD") {
             return rs.end();
         }
-        const stream = file.createReadStream()
-            .on("open", () => {
-                stream.pipe(rs);
-            })
-            .on("error", (err: Error) => {
-                console.error("Error while reading torrent stream", err);
-                rs.end(err + "");
-            });
-        // mmm, pipeing two times, wth?
-        // return;
         return pump(file.createReadStream(), rs);
     }
 
@@ -200,7 +190,6 @@ const serveTorrentStream = async (params: HandleHttpParams) => {
     rs.statusCode = 206;
     rs.setHeader("Content-Length", end - start + 1);
     rs.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + file.length);
-    rs.setHeader("Connection", "keep-alive");
 
     if (rq.method === "HEAD") {
         return rs.end();
@@ -240,7 +229,6 @@ const serveTorrentStreamCodeInH264 = async (params: HandleHttpParams) => {
     console.log("ffmpeg", args.map(a => "\"" + a + "\"").join(" "));
     const spawned = spawn("ffmpeg", args);
     rs.setHeader("content-type", "video/x-matroska");
-    rs.setHeader("connection", "keep-alive");
     let errHeaderIndex = 0;
     spawned.stderr.on("data", (buf: Buffer) => {
         if (rs.headersSent) {

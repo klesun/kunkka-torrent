@@ -38,6 +38,16 @@ const Server = async (rootPath: string) => {
         };
         const certifiedServer = http2
             .createSecureServer(tlsOptions, (rq, rs) => handleRq({ rq, rs, rootPath, api }))
+            .on("error", (err: NodeJS.ErrnoException) => {
+                if (err.code !== "EPIPE") {
+                    console.error("http2 server error", err);
+                }
+            })
+            .on("sessionError", (err: NodeJS.ErrnoException) => {
+                if (err.code !== "EPIPE") {
+                    console.error("http2 session error", err);
+                }
+            })
             .listen(443, "0.0.0.0", () => {
                 console.log("listening ssl kunkka-torrent requests on https://kunkka.klesun.net " + process.env.WEBSITE_SITE_NAME);
             });

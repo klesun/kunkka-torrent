@@ -1,5 +1,5 @@
 
-/** @return {{ infoHash: string } | null} */
+/** @return {{ infoHash: Infohash } | null} */
 export const parseMagnetUrl = (url) => {
     const match =
         url.match(/^magnet:\?xt=urn:btih:([a-fA-F0-9]{40}).*/) ?? // hnx

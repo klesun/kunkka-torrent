@@ -6,7 +6,6 @@ import type { IApi } from "./Api.ts";
 import type { SerialData } from "./TypeDefs";
 import { lookup } from "mime-types";
 import { HTTP_PORT } from "./Constants";
-import type { Writable } from "stream";
 import type * as EventEmitter from "events";
 import type { ReadStream } from "fs";
 import ServeInfoPage from "./actions/ServeInfoPage";
@@ -17,12 +16,14 @@ import { IS_P2P_FORBIDDEN } from "./torrent-backends/ITorrentBackend.ts";
 import type { Infohash } from "../common/types.ts";
 import { backend } from "./torrent-backends/ActiveBackend.ts";
 import type { JsonValue } from "@mhc/utils/types/utility";
+import type { Http2ServerRequest,Http2ServerResponse } from "node:http2";
 const { spawn } = require("child_process");
 const unzip = require("unzip-stream");
 const srt2vtt = require("srt-to-vtt");
 const fs = fsSync.promises;
 
-const ignoreEpipe = (rs: http.ServerResponse) => {
+
+const ignoreEpipe = (rs: http.ServerResponse | Http2ServerResponse) => {
     rs.on("error", (err: NodeJS.ErrnoException) => {
         if (err.code !== "EPIPE") {
             console.error("Response stream error", err);
@@ -30,14 +31,16 @@ const ignoreEpipe = (rs: http.ServerResponse) => {
     });
 };
 
+export type AnyHttpResponse = (http.ServerResponse | Http2ServerResponse) & { write: (chunk: string) => void };
+
 export interface HandleHttpParams {
-    rq: http.IncomingMessage,
-    rs: http.ServerResponse,
+    rq: http.IncomingMessage | Http2ServerRequest,
+    rs: AnyHttpResponse,
     rootPath: string,
     api: IApi,
 }
 
-const redirect = (rs: http.ServerResponse, url: string) => {
+const redirect = (rs: http.ServerResponse | Http2ServerResponse, url: string) => {
     rs.writeHead(302, {
         "Location": url,
     });
@@ -66,7 +69,7 @@ const removeDots = (path: string) => {
     return resultParts.join("/");
 };
 
-const setCorsHeaders = (rs: http.ServerResponse) => {
+const setCorsHeaders = (rs: http.ServerResponse | Http2ServerResponse) => {
     rs.setHeader("Access-Control-Allow-Origin", "*");
     rs.setHeader("Access-Control-Allow-Methods", "GET, POST");
     rs.setHeader("Access-Control-Allow-Headers", "X-Requested-With,content-type,pragma,cache-control");
@@ -102,7 +105,7 @@ const serveMkv = async (absPath: string, params: HandleHttpParams) => {
         .on("open", () => stream.pipe(params.rs))
         .on("error", err => {
             console.error("Error while streaming mkv file\n" + absPath + "\n", err);
-            params.rs.end(err);
+            params.rs.end(String(err));
         });
 };
 
@@ -167,7 +170,7 @@ const serveTorrentStream = async (params: HandleHttpParams) => {
     rs.setHeader("Content-Type", lookup(file.name) || "application/octet-stream");
 
     rs.setHeader("Accept-Ranges", "bytes");
-    rq.connection.setTimeout(3600000);
+    rq.socket?.setTimeout(3600000);
 
     const rangeStr = rq.headers.range || null;
     if (!rangeStr) {
@@ -290,7 +293,7 @@ const serveTorrentStreamExtractAudio = async (params: HandleHttpParams) => {
     const { rq, rs } = params;
     ignoreEpipe(rs);
     const { infoHash, filePath, streamIndex, codecName } = <Record<string, string>>url.parse(<string>rq.url, true).query;
-    rq.connection.setTimeout(3600000);
+    rq.socket?.setTimeout(3600000);
     assertValidInfoHash(infoHash);
     await backend.prepareTorrentStream(infoHash);
     const streamUrl = "http://localhost:" + HTTP_PORT + "/torrent-stream?infoHash=" +
@@ -351,7 +354,7 @@ type UnzipEntry = {
     allowHalfOpen: boolean,
     type: "File" | "Directory",
 
-    pipe: (destination: Writable) => EventEmitter.EventEmitter,
+    pipe: (destination: NodeJS.WritableStream) => EventEmitter.EventEmitter,
     autodrain: () => void,
 
     _readableState: unknown,
@@ -363,7 +366,7 @@ type UnzipEntry = {
 };
 
 const serveStreamedApiResponse = async <TItem>(
-    res: http.ServerResponse,
+    res: AnyHttpResponse,
     itemsIter: AsyncGenerator<TItem>,
 ) => {
     let started = false;
@@ -372,7 +375,6 @@ const serveStreamedApiResponse = async <TItem>(
         for await (const item of itemsIter) {
             if (!started) {
                 res.setHeader("content-type", "application/json");
-                res.setHeader("transfer-encoding", "chunked");
                 res.setHeader("X-Accel-Buffering", "no");
                 res.statusCode = 200;
                 res.write("[\n");
@@ -408,7 +410,7 @@ type ZipItem = { path: string, size: number } | null;
 const serveZipReader = async (params: HandleHttpParams) => {
     // set timeout to 10 minutes instead of 2 minutes, maybe could make
     // it even more and abort manually if torrent actually hangs...
-    params.rq.connection.setTimeout(10 * 60 * 1000);
+    params.rq.socket?.setTimeout(10 * 60 * 1000);
     const { file } = await getFileInTorrent(params);
     const readStream = file.createReadStream();
 
@@ -491,7 +493,7 @@ const serveZipReaderFile = async (params: HandleHttpParams) => {
     });
 };
 
-type Action = (rq: http.IncomingMessage, rs: http.ServerResponse) => Promise<SerialData> | SerialData;
+type Action = (rq: http.IncomingMessage | Http2ServerRequest, rs: http.ServerResponse | Http2ServerResponse) => Promise<SerialData> | SerialData;
 type ActionForApi = (api: IApi) => Action;
 
 const apiRouter: Record<string, ActionForApi> = {

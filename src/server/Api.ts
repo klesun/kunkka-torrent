@@ -15,6 +15,7 @@ import * as console from "node:console";
 import { backend } from "./torrent-backends/ActiveBackend";
 import { Infohash } from "../common/types.ts";
 import { fail } from "node:assert";
+import type { Http2ServerRequest } from "node:http2";
 
 function assertValidInfoHash(infoHash: string | null | undefined | string[]): asserts infoHash is Infohash {
     if (Array.isArray(infoHash)) {
@@ -25,7 +26,7 @@ function assertValidInfoHash(infoHash: string | null | undefined | string[]): as
     }
 }
 
-const getFfmpegInfo = async (rq: http.IncomingMessage) => {
+const getFfmpegInfo = async (rq: http.IncomingMessage | Http2ServerRequest) => {
     const { infoHash, filePath } = <Record<string, string>>url.parse(<string>rq.url, true).query;
     assertValidInfoHash(infoHash);
     if (!filePath) {
@@ -46,7 +47,7 @@ const getFfmpegInfo = async (rq: http.IncomingMessage) => {
     return JSON.parse(stdout);
 };
 
-const connectToSwarm = async (rq: http.IncomingMessage) => {
+const connectToSwarm = async (rq: http.IncomingMessage | Http2ServerRequest) => {
     const query = url.parse(<string>rq.url, true).query;
 
     const { infoHash } = query;
@@ -61,7 +62,7 @@ const connectToSwarm = async (rq: http.IncomingMessage) => {
     };
 };
 
-const getSwarmInfo = async (rq: http.IncomingMessage) => {
+const getSwarmInfo = async (rq: http.IncomingMessage | Http2ServerRequest) => {
     const { infoHash } = url.parse(<string>rq.url, true).query;
     assertValidInfoHash(infoHash);
     return backend.swarmSummary(infoHash);
@@ -110,7 +111,7 @@ const noAuthNeeded = (fileUrl: string) => {
  * sites like rutracker, bakabt, kinozal, etc... require login and password
  * to download torrents, so need to integrate with qbt python plugins
  */
-const downloadTorrentFile = async (rq: http.IncomingMessage) => {
+const downloadTorrentFile = async (rq: http.IncomingMessage | Http2ServerRequest) => {
     const { searchParams } = new URL(rq.url ?? fail("url"), "http://localhost");
     const fileUrl = searchParams.get("fileUrl") ?? fail("fileUrl");
 
@@ -173,7 +174,7 @@ const Api = () => {
     const torrentNamesFts = TorrentNamesFts();
     const infohashes = Infohashes();
 
-    const findTorrentsInLocalDb = async (req: http.IncomingMessage) => {
+    const findTorrentsInLocalDb = async (req: http.IncomingMessage | Http2ServerRequest) => {
         const { userInput } = <Record<string, string>>url.parse(<string>req.url, true).query;
         const ftsRows = await torrentNamesFts.select(userInput)
             .catch((error: null | undefined | { code?: "SQLITE_CANTOPEN" | unknown }) => {

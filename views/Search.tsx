@@ -94,7 +94,8 @@ function ParallelCap(maxParallelActions: number) {
 const torrentFileDownloadParallelCap = ParallelCap(1);
 
 function downloadTorrentFile(fileUrl: string) {
-    return torrentFileDownloadParallelCap.enqueue(() => api.downloadTorrentFile({ fileUrl }));
+    return api.downloadTorrentFile({ fileUrl });
+    // return torrentFileDownloadParallelCap.enqueue(() => api.downloadTorrentFile({ fileUrl }));
 }
 
 const getInfoHash = async (resultItem: QbtSearchResultItemExtended): Promise<{ infoHash: string, tr: string[] }> => {

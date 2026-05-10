@@ -4,6 +4,7 @@ import { readPost } from "./utils/Http";
 import { fail } from "node:assert";
 import type { JsonObject } from "@mhc/utils/types/utility.ts";
 import { stringifyError } from "../common/typedUtils.ts";
+import type { Http2ServerRequest, Http2ServerResponse } from "node:http2";
 
 /**
  * a mapping to the Web API of qbittorrent
@@ -16,7 +17,7 @@ const Qbtv2 = ({ port = 44011 } = {}) => {
     return {
         search: {
             /** @see https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#start-search */
-            start: async (rq: http.IncomingMessage, rs: http.ServerResponse) => {
+            start: async (rq: http.IncomingMessage | Http2ServerRequest, rs: http.ServerResponse | Http2ServerResponse) => {
                 const url = "http://127.0.0.1:" + port + "/api/v2/search/start";
 
                 const params: RequestInit = {
@@ -44,7 +45,7 @@ const Qbtv2 = ({ port = 44011 } = {}) => {
                 return { ...bodyParsed, cookie: fetchRs.headers.get("set-cookie") };
             },
             /** @see https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-search-results */
-            results: async (rq: http.IncomingMessage, rs: http.ServerResponse) => {
+            results: async (rq: http.IncomingMessage | Http2ServerRequest, rs: http.ServerResponse | Http2ServerResponse) => {
                 const rqBody = await readPost(rq);
                 const bodyData = new URLSearchParams(rqBody);
                 const url = "http://127.0.0.1:" + port + "/api/v2/search/results";

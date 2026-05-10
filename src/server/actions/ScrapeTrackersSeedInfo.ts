@@ -163,7 +163,7 @@ const scrapeTracker = async function*(tr: TrackerRecord, infohashes: string[]): 
         let msg;
         try {
             msg = await new Promise<Record<string, ScrapeResponseData>>((resolve, reject) => {
-                tracker.scrape(chunk, { timeout: 45000 }, (err: unknown, msg: Record<string, ScrapeResponseData>) => {
+                tracker.scrape(chunk, { timeout: 30000 }, (err: unknown, msg: Record<string, ScrapeResponseData>) => {
                     err ? reject(err) : resolve(msg);
                 });
             });

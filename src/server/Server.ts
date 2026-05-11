@@ -1,5 +1,6 @@
 import * as http from "http";
 import * as http2 from "http2";
+import { CLIENT_ABORT_CODES } from "./HandleHttpRequest";
 import * as fs from "fs";
 import type { HandleHttpParams } from "./HandleHttpRequest";
 import HandleHttpRequest from "./HandleHttpRequest";
@@ -35,16 +36,19 @@ const Server = async (rootPath: string) => {
             cert: fs.readFileSync(CERT_DIR + "/fullchain.pem"),
             key:  fs.readFileSync(CERT_DIR + "/privkey.pem"),
             allowHTTP1: true,
+            // default is 10MB which gets exhausted when client seeks (aborts a large-range request)
+            // before the Http2Stream write queue is freed by GC, causing NGHTTP2_ENHANCE_YOUR_CALM
+            maxSessionMemory: 200,
         };
         const certifiedServer = http2
             .createSecureServer(tlsOptions, (rq, rs) => handleRq({ rq, rs, rootPath, api }))
             .on("error", (err: NodeJS.ErrnoException) => {
-                if (err.code !== "EPIPE") {
+                if (!CLIENT_ABORT_CODES.has(err.code ?? "")) {
                     console.error("http2 server error", err);
                 }
             })
             .on("sessionError", (err: NodeJS.ErrnoException) => {
-                if (err.code !== "EPIPE") {
+                if (!CLIENT_ABORT_CODES.has(err.code ?? "")) {
                     console.error("http2 session error", err);
                 }
             })

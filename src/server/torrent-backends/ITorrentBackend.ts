@@ -1,5 +1,6 @@
 import * as os from "node:os";
 import type { Wire } from "bittorrent-protocol";
+import type { Readable } from "stream";
 
 export type SwarmSummary = {
     downloaded: number,
@@ -8,13 +9,14 @@ export type SwarmSummary = {
     ready: boolean,
     paused: boolean,
     wires: Record<string, Wire>,
+    debugLogs: string[],
 };
 
 export interface ITorrentFile {
     name: string,
     path: string,
     length: number,
-    createReadStream(opts?: { start?: number, end?: number }): NodeJS.ReadableStream,
+    createReadStream(opts?: { start?: number, end?: number }): Readable,
 }
 
 export interface TorrentEngineLike {

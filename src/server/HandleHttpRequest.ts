@@ -23,9 +23,11 @@ const srt2vtt = require("srt-to-vtt");
 const fs = fsSync.promises;
 
 
+export const CLIENT_ABORT_CODES = new Set(["EPIPE", "ECONNRESET", "ERR_HTTP2_STREAM_CANCEL"]);
+
 const ignoreEpipe = (rs: http.ServerResponse | Http2ServerResponse) => {
     rs.on("error", (err: NodeJS.ErrnoException) => {
-        if (err.code !== "EPIPE") {
+        if (!CLIENT_ABORT_CODES.has(err.code ?? "")) {
             console.error("Response stream error", err);
         }
     });
@@ -322,7 +324,6 @@ const serveTorrentStreamExtractAudio = async (params: HandleHttpParams) => {
     rs.statusCode = 206;
     // apparently, to make timeline navigation work you have to specify range max value even if it is a stream without known length, so, as a workaround, I just put 10 GiB as the range size, by the time client reaches the end of streamed audio, he will either just receive an EOF or will just disregard this request as he is already done watching the video
     rs.setHeader("Content-Range", "bytes " + start + "-9999999998/9999999999");
-    rs.setHeader("Connection", "keep-alive");
 
     const tail = spawn("tail", ["-c", `+${start}`]);
     const head = spawn("head", ["-c", `${chunkSize}`]);

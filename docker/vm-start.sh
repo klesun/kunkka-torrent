@@ -28,6 +28,7 @@ docker pull kunkkatorrents.azurecr.io/kunkka-torrent:latest
 docker run -d --name kunkka-torrent --restart unless-stopped \
   -p 80:80 -p 443:443 -p 6881:6881/tcp -p 6881:6881/udp \
   -e PORT=80 -e WEBSITE_SITE_NAME=kunkka-torrent \
+  -e "DEBUG=webtorrent*,bittorrent-tracker*,bittorrent-dht*,torrent-discovery*" \
   -v /mnt/kunkka-db-files:/mnt/kunkka-db-files \
   -v /etc/kunkka-letsencrypt:/etc/letsencrypt \
   kunkkatorrents.azurecr.io/kunkka-torrent:latest

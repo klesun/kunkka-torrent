@@ -7,6 +7,7 @@ import { Forbidden } from "@curveball/http-errors";
 import type { Infohash } from "../../common/types.ts";
 import type { Wire } from "bittorrent-protocol";
 import { fail } from "node:assert";
+import type { Readable } from "stream";
 
 declare module "webtorrent" {
     interface TorrentOptions {
@@ -21,6 +22,9 @@ declare module "webtorrent" {
             peerInterested: boolean,
             amInterested: boolean,
         }[],
+    }
+    interface TorrentFile {
+        createReadStream(opts?: { start?: number; end?: number }): Readable;
     }
 }
 
@@ -90,13 +94,34 @@ const DOWNLOADS_PATH = IS_AZURE_ENV
     // language=file-reference
     : __dirname + "/" + "../../../data/webtorrent-downloads";
 
+const DEBUG_LOG_RETENTION = 200;
+
 export class WebTorrentBackend {
     private readonly client: WebTorrent.Instance;
     private readonly infoHashToTorrent: Record<Infohash, WebTorrent.Torrent> = {};
     private readonly infoHashToWhenReady: Record<Infohash, Promise<TorrentEngineLike>> = {};
     private readonly infoHashToAddrToWire: Map<Infohash, Map<string, Wire>> = new Map();
+    private readonly debugLogs: string[] = [];
 
     constructor() {
+        // DEBUG env var is set at docker run time so webtorrent's debug instances are
+        // enabled from process start. Intercept stderr to capture their output.
+        const origWrite = process.stderr.write.bind(process.stderr);
+        const captureLog = (chunk: string | Uint8Array) => {
+            const line = (typeof chunk === "string" ? chunk : Buffer.from(chunk).toString("utf8"))
+                .replace(/\x1B\[[0-9;]*m/g, "").trimEnd();
+            if (line) {
+                this.debugLogs.push(line);
+                if (this.debugLogs.length > DEBUG_LOG_RETENTION * 2) {
+                    this.debugLogs.splice(0, DEBUG_LOG_RETENTION);
+                }
+            }
+        };
+        (process.stderr.write as unknown as (chunk: string | Uint8Array, cb?: () => void) => boolean) =
+            (chunk: string | Uint8Array, cb?: () => void) => {
+                captureLog(chunk);
+                return origWrite(chunk as string, cb as () => void);
+            };
         this.client = new WebTorrent();
     }
 
@@ -151,6 +176,7 @@ export class WebTorrentBackend {
             ready: torrent.ready,
             paused: torrent.paused,
             wires: Object.fromEntries((this.infoHashToAddrToWire.get(infoHash) ?? fail()).entries()),
+            debugLogs: this.debugLogs,
         };
     }
 }

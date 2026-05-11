@@ -1,5 +1,11 @@
 import Server from "./src/server/Server";
 
+process.on("uncaughtException", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EPIPE") return;
+    console.error("Uncaught exception", err);
+    process.exit(1);
+});
+
 // const tsNode = require('ts-node');
 
 // tsNode.register({

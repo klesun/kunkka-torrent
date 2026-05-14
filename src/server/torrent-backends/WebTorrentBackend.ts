@@ -1,4 +1,5 @@
 import WebTorrent from "webtorrent";
+import { readdirSync } from "node:fs";
 import { trackerRecords } from "../actions/ScrapeTrackersSeedInfo";
 import type { TorrentEngineLike, SwarmSummary } from "./ITorrentBackend";
 import  { IS_P2P_FORBIDDEN } from "./ITorrentBackend";
@@ -24,7 +25,7 @@ declare module "webtorrent" {
         }[],
     }
     interface TorrentFile {
-        createReadStream(opts?: { start?: number; end?: number }): Readable;
+        createReadStream(opts?: { start?: number, end?: number }): Readable,
     }
 }
 
@@ -138,6 +139,7 @@ export class WebTorrentBackend {
                     announce: trackers.length !== 0 ? trackers : trackerRecords.map(t => t.url),
                     path: DOWNLOADS_PATH,
                     deselect: true,
+                    skipVerify: true,
                 }, torrent => {
                     resolve({
                         torrent: { name: torrent.name },
@@ -169,6 +171,14 @@ export class WebTorrentBackend {
     swarmSummary(infoHash: Infohash): SwarmSummary {
         this.prepareTorrentStream(infoHash).catch(() => {});
         const torrent = this.infoHashToTorrent[infoHash];
+        const allTorrents = Object.values(this.infoHashToTorrent);
+        const totalPeers = allTorrents.reduce((sum, t) => sum + t.numPeers, 0);
+        let openFds: number | string;
+        try {
+            openFds = readdirSync("/proc/self/fd").length;
+        } catch {
+            openFds = "n/a";
+        }
         return {
             downloaded: torrent.downloaded,
             downloadSpeed: torrent.downloadSpeed,
@@ -177,6 +187,9 @@ export class WebTorrentBackend {
             paused: torrent.paused,
             wires: Object.fromEntries((this.infoHashToAddrToWire.get(infoHash) ?? fail()).entries()),
             debugLogs: this.debugLogs,
+            totalTorrents: allTorrents.length,
+            totalPeers,
+            openFds,
         };
     }
 }

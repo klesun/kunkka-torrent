@@ -10,6 +10,9 @@ export type SwarmSummary = {
     paused: boolean,
     wires: Record<string, Wire>,
     debugLogs: string[],
+    totalTorrents: number,
+    totalPeers: number,
+    openFds: number | string,
 };
 
 export interface ITorrentFile {

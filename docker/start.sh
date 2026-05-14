@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -n 65535
+
 echo "starting kunkka main app and side apps..."
 
 /usr/sbin/sshd
